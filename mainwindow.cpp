@@ -23,6 +23,23 @@ void MainWindow::on_runScan_clicked()
     else{
         toStatusBar("fail!");
     }
+    auto&& [value, isGetValue] = settings.getValue("numberOfPau");
+
+    if(isGetValue){
+        toStatusBar(value);
+    }
+    else{
+        toStatusBar("qwerty");
+        settings.setValue("numberOfPaths", "14");
+        settings.save();
+        auto&& [v, is] = settings.getValue("numberOfPaths");
+        if(is){
+            toStatusBar("ok");
+        }
+        else{
+            toStatusBar("be");
+        }
+    }
 }
 
 

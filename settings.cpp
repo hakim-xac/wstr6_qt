@@ -37,4 +37,18 @@ bool Settings::save()
     return saveToFile(ss);
 }
 
+void Settings::setValue(const std::string& key, const std::string& value)
+{
+    auto&& [_, isKey] = getValue(key);
+    if(isKey){
+        bd_[key] = value;
+    }
+    else{
+        bd_.insert( {key, value} );
+    }
+}
+
+
+
+
 }
