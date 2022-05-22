@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include "./ui_mainwindow.h"
+#include "settings.h"
 #include <sstream>
 
 
@@ -28,9 +29,12 @@ private:
     void toStatusBar(Type&& in);
 private:
     Ui::MainWindow *ui;
+    WSTR::Settings settings;
 };
 
 
+
+//////////////////////////// implementation of class functions /////////////////////////////////////////////
 
 
 template <typename Type>

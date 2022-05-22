@@ -6,6 +6,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
 }
 
 MainWindow::~MainWindow()
@@ -16,7 +17,12 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_runScan_clicked()
 {
-    toStatusBar("56hgkgh");
+    if(settings.save()){
+        toStatusBar("good!");
+    }
+    else{
+        toStatusBar("fail!");
+    }
 }
 
 

@@ -22,8 +22,10 @@ set(TS_FILES wstr6_qt_ru_RU.ts)
 set(PROJECT_SOURCES
         main.cpp
         mainwindow.cpp
+        settings.cpp
         mainwindow.h
         mainwindow.ui
+        settings.h
         ${TS_FILES}
 )
 
