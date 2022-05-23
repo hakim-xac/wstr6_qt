@@ -7,6 +7,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    settings.load();
 }
 
 MainWindow::~MainWindow()
@@ -29,8 +30,9 @@ void MainWindow::on_runScan_clicked()
         toStatusBar(value);
     }
     else{
+        using namespace std::string_literals;
         toStatusBar("qwerty");
-        settings.setValue("numberOfPaths", "14");
+        settings.setValue("numberOfPaths"s, "14"s);
         settings.save();
         auto&& [v, is] = settings.getValue("numberOfPaths");
         if(is){
