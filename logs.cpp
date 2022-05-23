@@ -16,6 +16,7 @@ Logs::~Logs()
 void Logs::flush()
 {
     out_ << base_.str() << std::endl;
+    base_.clear();
 }
 
 
