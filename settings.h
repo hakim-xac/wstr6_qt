@@ -2,6 +2,7 @@
 #define SETTINGS_H
 
 #include "./ui_mainwindow.h"
+#include "./logs.h"
 #include <string_view>
 #include <string>
 #include <sstream>
@@ -17,7 +18,6 @@ QT_END_NAMESPACE
 class Settings{
     size_t numberOfPaths_{};
 
-
     bool isLoad_{};
     std::queue<std::string> base_;
     static constexpr std::string_view settingFileName{ "./settings.dat" };
@@ -29,6 +29,8 @@ private:
 
     bool saveToFile(std::stringstream& in);
     std::pair<std::pair<std::string, std::string>, bool> parse(const std::string& str);
+public:
+    Logs logs{ std::cout };
 public:
     Settings() = default;
     bool isLoad() const;
@@ -66,7 +68,8 @@ std::pair<Type, bool> Settings
 }
 
 
-template <typename Type> void Settings
+template <typename Type>
+void Settings
 ::setValue(Type&& key, Type&& value ){
     auto&& [_, isKey] = getValue(key);
     if(isKey){

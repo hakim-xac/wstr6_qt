@@ -38,17 +38,20 @@ private:
 
 
 template <typename Type>
-    QString MainWindow
-    ::toString(Type&& str){
-        std::stringstream ss;
-        ss << std::forward<Type>(str);
-        return QString::fromStdString(ss.str());
-    }
+QString MainWindow
+::toString(Type&& str){
+    std::stringstream ss;
+    ss << std::forward<Type>(str);
+    return QString::fromStdString(ss.str());
+}
 
 
-    template <typename Type>
-        void MainWindow
-        ::toStatusBar(Type&& str){
-            ui->statusBar->setText(toString(std::forward<Type>(str)));
-        }
+template <typename Type>
+void MainWindow
+::toStatusBar(Type&& str){
+    settings.logs.push(str);
+    ui->statusBar->setText(toString(std::forward<Type>(str)));
+}
+
+
 #endif // MAINWINDOW_H

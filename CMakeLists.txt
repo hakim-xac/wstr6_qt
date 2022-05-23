@@ -23,9 +23,12 @@ set(PROJECT_SOURCES
         main.cpp
         mainwindow.cpp
         settings.cpp
+        logs.cpp
         mainwindow.h
         mainwindow.ui
         settings.h
+        logs.h
+        enums.h
         ${TS_FILES}
 )
 

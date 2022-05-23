@@ -18,6 +18,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_runScan_clicked()
 {
+
     if(settings.save()){
         toStatusBar("good!");
     }
@@ -42,6 +43,8 @@ void MainWindow::on_runScan_clicked()
             toStatusBar("be");
         }
     }
+
+    settings.logs.flush();
 }
 
 
