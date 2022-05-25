@@ -9,12 +9,12 @@
 namespace WSTR {
 
 
-bool Settings::saveToFile(std::stringstream& in)
+bool Settings::saveToFile(std::stringstream& buffer)
 {
     std::ofstream fs(settingFileName.data());
     if(!fs.is_open()) return false;
     fs.clear();
-    if(!(fs << in.str())){
+    if(!(fs << buffer.str())){
         fs.close();
         return false;
     }
@@ -31,12 +31,6 @@ std::pair<std::pair<std::string, std::string>, bool> Settings::parse(const std::
 }
 
 
-bool Settings::isLoad() const
-{
-    return isLoad_;
-}
-
-
 bool Settings::save()
 {
     if(bd_.empty()) return false;
@@ -50,20 +44,32 @@ bool Settings::save()
 
 bool Settings::load()
 {
+
+    logs.pushAndFlash("Start Settings.load()", WSTR::AppType::Debug);
+
     std::ifstream fs(settingFileName.data());
-    if(!fs.is_open()) return false;
+    if(!fs.is_open()){
+        std::stringstream ss{"Can`t open settings file: "};
+        ss << settingFileName.data();
+        logs.pushAndFlash(ss.str(), WSTR::AppType::Debug);
+        return false;
+    }
     std::vector <std::string> tmpVecConfig;
 
     std::copy(std::istream_iterator<std::string>(fs), {}, std::back_inserter(tmpVecConfig));
     if(!tmpVecConfig.size()) {
-        std::cout << "Empty configuration file" << std::endl;
+
+        logs.pushAndFlash("Empty configuration file", WSTR::AppType::Debug);
+
         fs.close();
         return false;
     }
     for(auto&& line: tmpVecConfig){
         auto&& [pair, isParse] = parse(line);
         if(!isParse){
-            std::cout << "Parse(line) == false" << std::endl;
+
+            logs.pushAndFlash("Parse(line) == false", WSTR::AppType::Debug);
+
             fs.close();
             return false;
         }
@@ -73,18 +79,23 @@ bool Settings::load()
 
         auto&& [newValue, isGet] = getValue(key);
         if(!isGet){
-            std::cout << "not load after saveToBase" << std::endl;
+
+            logs.pushAndFlash("not load after saveToBase", WSTR::AppType::Debug);
+
             fs.close();
             return false;
         }
         if(newValue != value) {
-            std::cout << "error saved after saveToBase" << std::endl;
+
+            logs.pushAndFlash("error saved after saveToBase", WSTR::AppType::Debug);
+
             fs.close();
             return false;
         }
-        std::cout << "all good"<< std::endl;
+        logs.pushAndFlash("successful loading settings\nkey: " + key + " value: " + value, WSTR::AppType::Debug);
     }
     fs.close();
+    logs.pushAndFlash("successful loading settings", WSTR::AppType::Debug);
     return true;
 }
 

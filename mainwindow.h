@@ -23,13 +23,42 @@ private slots:
     void on_runScan_clicked();
 
 private:
+    ///
+    /// \brief toString
+    /// \param str
+    /// \return
+    ///
     template <typename Type>
-    static QString toString(Type&& str);
+    static std::pair< QString, bool > toString(Type&& str);
+
+    ///
+    /// \brief toType
+    /// \param str
+    /// \return
+    ///
+    template <typename OutType, typename Type>
+    static std::pair< OutType, bool > toType(Type&& str);
+
+    ///
+    /// \brief toStatusBar
+    /// \param in
+    ///
     template<typename Type>
     void toStatusBar(Type&& in);
+
+    ///
+    /// \brief variableInitialization
+    ///
+    void variableInitialization();
+
 private:
     Ui::MainWindow *ui;
+
+    ///
+    /// \brief settings
+    ///
     WSTR::Settings settings;
+
 };
 
 
@@ -38,11 +67,28 @@ private:
 
 
 template <typename Type>
-QString MainWindow
+std::pair< QString, bool > MainWindow
 ::toString(Type&& str){
     std::stringstream ss;
     ss << std::forward<Type>(str);
-    return QString::fromStdString(ss.str());
+    if(ss.fail()) {
+        return { QString(), false };
+    }
+    return { QString::fromStdString(ss.str()), true };
+}
+
+template <typename OutType, typename Type>
+std::pair< OutType, bool > MainWindow
+::toType(Type&& str){
+    std::stringstream ss;
+    ss << std::forward<Type>(str);
+    if(ss.fail()) return { OutType(), false };
+
+    OutType tmp{};
+
+    if(ss >> tmp) return { tmp, true };
+
+    return { OutType(), false };
 }
 
 
@@ -50,7 +96,17 @@ template <typename Type>
 void MainWindow
 ::toStatusBar(Type&& str){
     settings.logs.push(str);
-    ui->statusBar->setText(toString(std::forward<Type>(str)));
+
+    std::stringstream ss{"Error transform!\n"};
+    ss << "String: " << str;
+
+    auto&& [new_str, isTransform] = toString(std::forward<Type>(str));
+    if(!isTransform){
+        settings.logs.pushAndFlash(ss.str(), WSTR::AppType::Debug);
+        return;
+    }
+    ui->statusBar->setText(std::move(new_str));
+
 }
 
 
