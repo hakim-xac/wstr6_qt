@@ -10,6 +10,12 @@ enum class AppType{
     Release, Debug
 };
 
+
+enum class SelectBase{
+    General
+    , Paths
+};
+
 }
 
 #endif // ENUMS_H

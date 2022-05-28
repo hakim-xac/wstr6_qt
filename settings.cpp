@@ -8,8 +8,12 @@
 
 namespace WSTR {
 
-
-bool Settings::saveToFile(std::stringstream& buffer)
+///
+/// \brief Settings::saveToFile
+/// \param buffer
+/// \return
+///
+bool Settings::saveToFile(std::stringstream& buffer) const
 {
     std::ofstream fs(settingFileName.data());
     if(!fs.is_open()) return false;
@@ -22,7 +26,11 @@ bool Settings::saveToFile(std::stringstream& buffer)
     return true;
 }
 
-
+///
+/// \brief Settings::parse
+/// \param str
+/// \return
+///
 std::pair<std::pair<std::string, std::string>, bool> Settings::parse(const std::string& str)
 {
     size_t pos{ str.find(':') };
@@ -30,8 +38,63 @@ std::pair<std::pair<std::string, std::string>, bool> Settings::parse(const std::
     return { std::make_pair(str.substr(0, pos), str.substr(pos+1)) , true };
 }
 
+///
+/// \brief Settings::selectBase
+/// \param sb
+/// \return
+///
+std::map<std::string, std::string> *Settings::selectBase(SelectBase sb)
+{
+    switch(sb){
+    case WSTR::SelectBase::General:
+    return &bd_;
+    break;
+    case WSTR::SelectBase::Paths:
+    return &pathsList_;
+    break;
+    default:
+        return nullptr;
+    }
+}
 
-bool Settings::save()
+///
+/// \brief Settings::PathFromQComboBoxToPathsBufer
+/// \param list
+///
+void Settings::PathFromQComboBoxToPathsBufer(const QComboBox& list)
+{
+    using namespace std::string_literals;
+    pathsList_.clear();
+    for(int it{}, end{ list.count() }; it < end; ++it){
+        setValue("path_"s+std::to_string(it), list.itemText(it).toStdString(), WSTR::SelectBase::Paths);
+    }
+}
+
+///
+/// \brief Settings::Settings
+///
+Settings::Settings()
+    : default_()
+    , countOfPaths_()
+    , base_()
+    , bd_(default_.bd_)
+    , pathsList_() {}
+
+
+///
+/// \brief Settings::~Settings
+///
+Settings::~Settings()
+{
+    save();
+}
+
+
+///
+/// \brief Settings::save
+/// \return
+///
+bool Settings::save() const
 {
     if(bd_.empty()) return false;
     std::stringstream ss;
@@ -39,9 +102,17 @@ bool Settings::save()
         ss << key << ":" << value << "\n";
     }
 
+    for(auto&& [key, value]: pathsList_){
+        ss << key << ":" << value << "\n";
+    }
+
     return saveToFile(ss);
 }
 
+///
+/// \brief Settings::load
+/// \return
+///
 bool Settings::load()
 {
 
@@ -75,9 +146,26 @@ bool Settings::load()
         }
         auto&& [key, value] = pair;
 
-        setValue(key, value);
+        using namespace std::string_literals;
+        WSTR::SelectBase sb{ WSTR::SelectBase::General };
 
-        auto&& [newValue, isGet] = getValue(key);
+        if(key.substr(0, 5) == "path_"s) {
+            if(!setValue(key, value, WSTR::SelectBase::Paths)){
+                std::stringstream ss{ "if(!setValue(key, value, WSTR::SelectBase::Paths)) == false\n" };
+                logs.pushAndFlash(ss.str(), WSTR::AppType::Debug);
+                return false;
+            }
+            sb = WSTR::SelectBase::Paths;
+        }
+        else {
+            if(!setValue(key, value)){
+                std::stringstream ss{ "if(!setValue(key, value)) == false\n" };
+                logs.pushAndFlash(ss.str(), WSTR::AppType::Debug);
+                return false;
+            }
+            sb = WSTR::SelectBase::General;
+        }
+        auto&& [newValue, isGet] = getValue(key, sb);
         if(!isGet){
 
             logs.pushAndFlash("not load after saveToBase", WSTR::AppType::Debug);
@@ -97,6 +185,15 @@ bool Settings::load()
     fs.close();
     logs.pushAndFlash("successful loading settings", WSTR::AppType::Debug);
     return true;
+}
+
+///
+/// \brief Settings::getDefaultPath
+/// \return
+///
+QString Settings::getDefaultPath() const
+{
+    return default_.defaultPath_;
 }
 
 

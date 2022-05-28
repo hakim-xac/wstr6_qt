@@ -22,14 +22,18 @@ public:
 private slots:
     void on_runScan_clicked();
 
+    void on_pushButton_clicked();
+
+    void on_paths_activated(int index);
+
 private:
     ///
-    /// \brief toString
+    /// \brief toQString
     /// \param str
     /// \return
     ///
     template <typename Type>
-    static std::pair< QString, bool > toString(Type&& str);
+    static std::pair< QString, bool > toQString(Type&& str);
 
     ///
     /// \brief toType
@@ -38,6 +42,7 @@ private:
     ///
     template <typename OutType, typename Type>
     static std::pair< OutType, bool > toType(Type&& str);
+
 
     ///
     /// \brief toStatusBar
@@ -50,6 +55,8 @@ private:
     /// \brief variableInitialization
     ///
     void variableInitialization();
+
+    void initPathsView();
 
 private:
     Ui::MainWindow *ui;
@@ -65,10 +72,14 @@ private:
 
 //////////////////////////// implementation of class functions /////////////////////////////////////////////
 
-
+///
+/// \brief MainWindow::toQString
+/// \param str
+/// \return
+///
 template <typename Type>
 std::pair< QString, bool > MainWindow
-::toString(Type&& str){
+::toQString(Type&& str){
     std::stringstream ss;
     ss << std::forward<Type>(str);
     if(ss.fail()) {
@@ -77,6 +88,11 @@ std::pair< QString, bool > MainWindow
     return { QString::fromStdString(ss.str()), true };
 }
 
+///
+/// \brief MainWindow::toType
+/// \param str
+/// \return
+///
 template <typename OutType, typename Type>
 std::pair< OutType, bool > MainWindow
 ::toType(Type&& str){
@@ -85,13 +101,17 @@ std::pair< OutType, bool > MainWindow
     if(ss.fail()) return { OutType(), false };
 
     OutType tmp{};
+    ss >> tmp;
+    if(ss.fail()) return { OutType(), false };
 
-    if(ss >> tmp) return { tmp, true };
-
-    return { OutType(), false };
+    return { tmp, true };
 }
 
 
+///
+/// \brief MainWindow::toStatusBar
+/// \param str
+///
 template <typename Type>
 void MainWindow
 ::toStatusBar(Type&& str){
@@ -100,7 +120,7 @@ void MainWindow
     std::stringstream ss{"Error transform!\n"};
     ss << "String: " << str;
 
-    auto&& [new_str, isTransform] = toString(std::forward<Type>(str));
+    auto&& [new_str, isTransform] = toQString(std::forward<Type>(str));
     if(!isTransform){
         settings.logs.pushAndFlash(ss.str(), WSTR::AppType::Debug);
         return;

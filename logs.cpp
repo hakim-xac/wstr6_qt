@@ -5,7 +5,7 @@ namespace WSTR {
 Logs::Logs(std::ostream& out)
     : base_()
     , out_(std::cout)
-    , currentApplicationType_(WSTR::AppType::Release) {}
+    , currentApplicationType_(WSTR::AppType::Debug) {}
 
 
 Logs::~Logs()

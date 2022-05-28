@@ -8,6 +8,7 @@
 #include <sstream>
 #include <queue>
 #include <map>
+#include <QDir>
 
 namespace WSTR {
 
@@ -17,10 +18,41 @@ QT_END_NAMESPACE
 
 class Settings{
 
+    struct Default{
+
+        ///
+        ///
+        ///
+        const QString defaultPath_{ QCoreApplication::applicationDirPath() };
+
+        ///
+        ///
+        ///
+        const std::map<std::string, std::string> bd_{
+            { "countOfPaths", "0" }
+            , { "currentPathIndex", "0" }
+        };
+    };
+
+
+
+
+
+
+
+private:            // PRIVATE VARIABLES
+
+
+    ///
+    /// \brief default_
+    ///
+    Default default_;
+
+
     ///
     ///
     ///
-    size_t numberOfPaths_{};
+    size_t countOfPaths_;
 
 
     ///
@@ -29,25 +61,32 @@ class Settings{
     ///
     std::queue<std::string> base_;
 
+
+    ///
+    ///
+    ///
+    std::map<std::string, std::string> bd_;
+
+    ///
+    /// \brief pathsList_
+    ///
+    std::map<std::string, std::string> pathsList_;
+
+
+private:            // PRIVATE STATIC VARIABLES
+
     ///
     ///
     ///
     static constexpr std::string_view settingFileName{ "./settings.dat" };
 
-    ///
-    ///
-    ///
-    std::map<std::string, std::string> bd_{
-        { "numberOfPaths", "5" }
-        , { "numberOfPa", "7" }
-    };
-private:
+private:            // PRIVATE FUNCTIONS
     ///
     /// \brief saveToFile
     /// \param in
     /// \return
     ///
-    bool saveToFile(std::stringstream& buffer);
+    bool saveToFile(std::stringstream& buffer) const;
 
     ///
     /// \brief parse
@@ -56,18 +95,28 @@ private:
     ///
     std::pair<std::pair<std::string, std::string>, bool> parse(const std::string& str);
 
+    ///
+    /// \brief selectBase
+    /// \param sb
+    /// \return
+    ///
+    std::map<std::string, std::string>* selectBase(WSTR::SelectBase sb = WSTR::SelectBase::General);
 
-public:
+
+public:             // PUBLIC VARIABLES
     Logs logs{ std::cout };
-public:
-    Settings() = default;
+
+public:             // PUBLIC FUNCTIONS
+
+    Settings();
+    ~Settings();
 
 
     ///
     /// \brief save
     /// \return
     ///
-    bool save();
+    bool save() const;
 
     ///
     /// \brief load
@@ -78,20 +127,35 @@ public:
     ///
     /// \brief getValue
     /// \param key
+    /// \param sb
     /// \return
     ///
     template <typename Type = std::string>
     std::pair<Type, bool>
-    getValue(std::string key);
+    getValue(std::string key, WSTR::SelectBase sb = WSTR::SelectBase::General);
 
     ///
     /// \brief setValue
     /// \param key
     /// \param value
+    /// \param sb
     ///
     template <typename KeyType = std::string, typename ValueType = std::string>
-    void
-    setValue(KeyType&& key, ValueType&& value );
+    bool
+    setValue(KeyType&& key, ValueType&& value, WSTR::SelectBase sb = WSTR::SelectBase::General);
+
+    ///
+    /// \brief getDefaultPath
+    /// \return
+    ///
+    QString getDefaultPath() const;
+
+    ///
+    /// \brief qListToSSBufer
+    /// \param bufer
+    /// \param list
+    ///
+    void PathFromQComboBoxToPathsBufer(const QComboBox& list);
 };
 
 
@@ -100,14 +164,16 @@ public:
 
 template <typename Type>
 std::pair<Type, bool> Settings
-::getValue(std::string key){
+::getValue(std::string key, WSTR::SelectBase sb){
+    auto base{ selectBase(sb) };
+    if(!base) return { Type(), false };
     try{
         if constexpr(std::is_same_v<Type, std::string>){
-            return { bd_.at(key.data()), true };
+            return { base->at(key.data()), true };
         }
         else {
             std::stringstream ss;
-            ss << bd_.at(key.data());
+            ss << base->at(key.data());
             Type tmp{};
             if(ss >> tmp) return { tmp, true };
             return { Type() , false };
@@ -121,15 +187,19 @@ std::pair<Type, bool> Settings
 
 
 template <typename KeyType, typename ValueType>
-void Settings
-::setValue(KeyType&& key, ValueType&& value ){
-    auto&& [_, isKey] = getValue(key);
+bool Settings
+::setValue(KeyType&& key, ValueType&& value, WSTR::SelectBase sb ){
+    std::map<std::string, std::string>* base{ selectBase(sb) };
+    if(!base) return false;
+
+    auto&& [_, isKey] = getValue(key, sb);
     if(isKey){
-        bd_[std::forward<KeyType>(key)] = std::forward<ValueType>(value);
+        (*base)[std::forward<KeyType>(key)] = std::forward<ValueType>(value);
     }
     else{
-        bd_.insert( {std::forward<KeyType>(key), std::forward<ValueType>(value)} );
+        base->insert( {std::forward<KeyType>(key), std::forward<ValueType>(value)} );
     }
+    return true;
 }
 
 
