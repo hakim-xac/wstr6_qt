@@ -73,12 +73,19 @@ private:            // PRIVATE VARIABLES
     std::map<std::string, std::string> pathsList_;
 
 
-private:            // PRIVATE STATIC VARIABLES
+private:            // PRIVATE STATIC VARIABLES AND FUNCTIONS
 
     ///
     ///
     ///
     static constexpr std::string_view settingFileName{ "./settings.dat" };
+
+    ///
+    /// \brief checkDirExists
+    /// \param pathDir
+    /// \return
+    ///
+    static bool checkDirExists(std::string_view pathDir);
 
 private:            // PRIVATE FUNCTIONS
     ///
@@ -93,7 +100,17 @@ private:            // PRIVATE FUNCTIONS
     /// \param str
     /// \return
     ///
-    std::pair<std::pair<std::string, std::string>, bool> parse(const std::string& str);
+    std::pair<std::pair<std::string, std::string>, bool> parseLine(const std::string& str);
+
+    ///
+    /// \brief parse
+    /// \param configBuffer
+    /// \return
+    ///
+    bool parse(const std::vector<std::string>& configBuffer);
+
+    template <typename KeyType, typename ValueType>
+    bool checkValue(KeyType&& key, ValueType&& value, WSTR::SelectBase sb = WSTR::SelectBase::General);
 
     ///
     /// \brief selectBase
@@ -101,7 +118,6 @@ private:            // PRIVATE FUNCTIONS
     /// \return
     ///
     std::map<std::string, std::string>* selectBase(WSTR::SelectBase sb = WSTR::SelectBase::General);
-
 
 public:             // PUBLIC VARIABLES
     Logs logs{ std::cout };
@@ -161,7 +177,12 @@ public:             // PUBLIC FUNCTIONS
 
 //////////////////////////// implementation of class functions /////////////////////////////////////////////
 
-
+///
+/// \brief Settings::getValue
+/// \param key
+/// \param sb
+/// \return
+///
 template <typename Type>
 std::pair<Type, bool> Settings
 ::getValue(std::string key, WSTR::SelectBase sb){
@@ -185,7 +206,13 @@ std::pair<Type, bool> Settings
 
 }
 
-
+///
+/// \brief Settings::setValue
+/// \param key
+/// \param value
+/// \param sb
+/// \return
+///
 template <typename KeyType, typename ValueType>
 bool Settings
 ::setValue(KeyType&& key, ValueType&& value, WSTR::SelectBase sb ){
@@ -198,6 +225,35 @@ bool Settings
     }
     else{
         base->insert( {std::forward<KeyType>(key), std::forward<ValueType>(value)} );
+    }
+    return true;
+}
+
+///
+/// \brief Settings::checkValue
+/// \param key
+/// \param value
+/// \param sb
+/// \return
+///
+template<typename KeyType, typename ValueType>
+bool Settings::checkValue(KeyType&& key, ValueType&& value, SelectBase sb)
+{
+    auto&& [newValue, isGet] = getValue(std::forward<KeyType>(key), sb);
+
+    if(!isGet){
+        std::stringstream ss{ "bool Settings::checkValue(KeyType&& key, ValueType&& value, SelectBase sb)\n" };
+        ss << "auto&& [newValue, isGet] = getValue(key, sb);\n";
+        ss << "isGet == FALSE\n";
+        logs.pushAndFlash(ss.str(), WSTR::AppType::Debug);
+        return false;
+    }
+    if(newValue != std::forward<ValueType>(value)) {
+        std::stringstream ss{ "bool Settings::checkValue(KeyType&& key, ValueType&& value, SelectBase sb)\n" };
+        ss << "auto&& [newValue, isGet] = getValue(key, sb);\n";
+        ss << "(newValue == value) == FALSE \n";
+        logs.pushAndFlash(ss.str(), WSTR::AppType::Debug);
+        return false;
     }
     return true;
 }

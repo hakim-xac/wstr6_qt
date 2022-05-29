@@ -1,5 +1,6 @@
 #include "settings.h"
 #include <string>
+#include <string_view>
 #include <sstream>
 #include <fstream>
 #include <vector>
@@ -31,11 +32,59 @@ bool Settings::saveToFile(std::stringstream& buffer) const
 /// \param str
 /// \return
 ///
-std::pair<std::pair<std::string, std::string>, bool> Settings::parse(const std::string& str)
+std::pair<std::pair<std::string, std::string>, bool> Settings::parseLine(const std::string& str)
 {
     size_t pos{ str.find(':') };
     if(pos == std::string::npos || (pos+1) == std::string::npos) return {{"", "" }, false};
     return { std::make_pair(str.substr(0, pos), str.substr(pos+1)) , true };
+}
+
+bool Settings::parse(const std::vector<std::string> &configBuffer)
+{
+    using namespace std::literals;
+
+    for(auto&& line: configBuffer){
+        auto&& [pair, isParse] = parseLine(line);
+        if(!isParse){
+            logs.pushAndFlash("Parse(line) == false", WSTR::AppType::Debug);
+            return false;
+        }
+
+        auto&& [key, value] = pair;
+        WSTR::SelectBase sb{ WSTR::SelectBase::General };
+
+        if(key.starts_with("path_"sv)) {
+            if(!checkDirExists(value)){
+                std::stringstream ss{ "if(!checkDirExists(value)) == false\n" };
+                ss << "value: " << value << std::endl;
+                logs.pushAndFlash(ss.str(), WSTR::AppType::Debug);
+                continue;
+            }
+            if(!setValue(key, value, WSTR::SelectBase::Paths)){
+                std::stringstream ss{ "if(!setValue(key, value, WSTR::SelectBase::Paths)) == false\n" };
+                logs.pushAndFlash(ss.str(), WSTR::AppType::Debug);
+                return false;
+            }
+            sb = WSTR::SelectBase::Paths;
+        }
+        else {
+            if(!setValue(key, value)){
+                std::stringstream ss{ "if(!setValue(key, value)) == false\n" };
+                logs.pushAndFlash(ss.str(), WSTR::AppType::Debug);
+                return false;
+            }
+            sb = WSTR::SelectBase::General;
+        }
+
+        if(!checkValue(key, value, sb)){
+            std::stringstream ss{ "if(!checkValue(key, value, sb)) == false\n" };
+            logs.pushAndFlash(ss.str(), WSTR::AppType::Debug);
+            return false;
+        }
+
+        logs.pushAndFlash("successful loading settings\nkey: " + key + " value: " + value, WSTR::AppType::Debug);
+    }
+    return true;
 }
 
 ///
@@ -55,6 +104,17 @@ std::map<std::string, std::string> *Settings::selectBase(SelectBase sb)
     default:
         return nullptr;
     }
+}
+
+///
+/// \brief Settings::checkDirExists
+/// \param pathDir
+/// \return
+///
+bool Settings::checkDirExists(std::string_view pathDir)
+{
+    QDir dir{ pathDir.data() };
+    return dir.exists();
 }
 
 ///
@@ -135,53 +195,11 @@ bool Settings::load()
         fs.close();
         return false;
     }
-    for(auto&& line: tmpVecConfig){
-        auto&& [pair, isParse] = parse(line);
-        if(!isParse){
-
-            logs.pushAndFlash("Parse(line) == false", WSTR::AppType::Debug);
-
-            fs.close();
-            return false;
-        }
-        auto&& [key, value] = pair;
-
-        using namespace std::string_literals;
-        WSTR::SelectBase sb{ WSTR::SelectBase::General };
-
-        if(key.substr(0, 5) == "path_"s) {
-            if(!setValue(key, value, WSTR::SelectBase::Paths)){
-                std::stringstream ss{ "if(!setValue(key, value, WSTR::SelectBase::Paths)) == false\n" };
-                logs.pushAndFlash(ss.str(), WSTR::AppType::Debug);
-                return false;
-            }
-            sb = WSTR::SelectBase::Paths;
-        }
-        else {
-            if(!setValue(key, value)){
-                std::stringstream ss{ "if(!setValue(key, value)) == false\n" };
-                logs.pushAndFlash(ss.str(), WSTR::AppType::Debug);
-                return false;
-            }
-            sb = WSTR::SelectBase::General;
-        }
-        auto&& [newValue, isGet] = getValue(key, sb);
-        if(!isGet){
-
-            logs.pushAndFlash("not load after saveToBase", WSTR::AppType::Debug);
-
-            fs.close();
-            return false;
-        }
-        if(newValue != value) {
-
-            logs.pushAndFlash("error saved after saveToBase", WSTR::AppType::Debug);
-
-            fs.close();
-            return false;
-        }
-        logs.pushAndFlash("successful loading settings\nkey: " + key + " value: " + value, WSTR::AppType::Debug);
+    if(!parse(tmpVecConfig)) {
+        fs.close();
+        return false;
     }
+
     fs.close();
     logs.pushAndFlash("successful loading settings", WSTR::AppType::Debug);
     return true;

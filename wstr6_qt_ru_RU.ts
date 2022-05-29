@@ -25,33 +25,33 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="91"/>
+        <location filename="mainwindow.ui" line="109"/>
         <source>СКАНИРОВАТЬ</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="111"/>
+        <location filename="mainwindow.ui" line="129"/>
         <source>Всего реплеев:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="139"/>
-        <location filename="mainwindow.ui" line="190"/>
+        <location filename="mainwindow.ui" line="157"/>
+        <location filename="mainwindow.ui" line="208"/>
         <source>0</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="165"/>
+        <location filename="mainwindow.ui" line="183"/>
         <source>Всего валидных:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="220"/>
+        <location filename="mainwindow.ui" line="238"/>
         <source>STATUS_BAR</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="136"/>
+        <location filename="mainwindow.cpp" line="124"/>
         <source>Open Directory</source>
         <translation type="unfinished"></translation>
     </message>

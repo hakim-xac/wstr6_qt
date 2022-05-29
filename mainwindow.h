@@ -3,6 +3,7 @@
 
 #include "./ui_mainwindow.h"
 #include "settings.h"
+#include "replay.h"
 #include <sstream>
 
 
@@ -56,7 +57,12 @@ private:
     ///
     void variableInitialization();
 
+    ///
+    /// \brief initPathsView
+    ///
     void initPathsView();
+
+    QFileInfoList scanDirectory(const QString& pathDir);
 
 private:
     Ui::MainWindow *ui;

@@ -65,7 +65,7 @@ void Logs
             base_ << std::setw(10) << std::left << "Time: " << "| "
               << std::setw(15) << std::right << currentTime.toString("hh:mm:ss:zzz").toStdString() << "\n"
               << std::setw(10) << std::left << "Message: " << "| "
-              << std::left << std::forward<Type>(elem) << "\n\n";
+              << std::left << std::forward<Type>(elem) << "\n";
         }
 }
 

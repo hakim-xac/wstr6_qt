@@ -3,6 +3,10 @@
 #include <QFileDialog>
 #include <QStringListModel>
 
+///
+/// \brief MainWindow::MainWindow
+/// \param parent
+///
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -16,44 +20,12 @@ MainWindow::MainWindow(QWidget *parent)
 
 }
 
+///
+/// \brief MainWindow::~MainWindow
+///
 MainWindow::~MainWindow()
 {
     delete ui;
-}
-
-///
-/// \brief MainWindow::on_runScan_clicked
-///
-void MainWindow::on_runScan_clicked()
-{
-
-    if(settings.save()){
-        toStatusBar("good!");
-    }
-    else{
-        toStatusBar("fail!");
-    }
-    auto&& [value, isGetValue] = settings.getValue("numberOfPau");
-
-    if(isGetValue){
-        toStatusBar(value);
-    }
-    else{
-        using namespace std::string_literals;
-        toStatusBar("qwerty");
-        std::string sd{"7"};
-        settings.setValue("countOfPaths"s, sd);
-        settings.save();
-        auto&& [v, is] = settings.getValue("countOfPaths");
-        if(is){
-            toStatusBar("ok");
-        }
-        else{
-            toStatusBar("be");
-        }
-    }
-
-    settings.logs.flush();
 }
 
 ///
@@ -127,6 +99,22 @@ void MainWindow::initPathsView()
 }
 
 ///
+/// \brief MainWindow::scanDirectory
+/// \param pathDir
+/// \return
+///
+QFileInfoList MainWindow::scanDirectory(const QString& pathDir)
+{
+QDir dir{ pathDir };
+dir.setFilter(QDir::Files | QDir::NoDotAndDotDot | QDir::NoSymLinks);
+QStringList filters("*.wotreplay");
+ dir.setNameFilters(filters);
+
+dir.setSorting(QDir::Size | QDir::Reversed);
+return dir.entryInfoList();
+}
+
+///
 /// \brief MainWindow::on_pushButton_clicked
 ///
 void MainWindow::on_pushButton_clicked()
@@ -137,6 +125,8 @@ void MainWindow::on_pushButton_clicked()
                                                     currentDir,
                                                     QFileDialog::ShowDirsOnly
                                                     | QFileDialog::DontResolveSymlinks) };
+    if(dir.isEmpty()) return;
+
     auto findIndex{ ui->paths->findText(dir) };
 
     if(findIndex != -1){
@@ -147,6 +137,7 @@ void MainWindow::on_pushButton_clicked()
         ui->paths->addItem(dir);
         ui->paths->setCurrentIndex(ui->paths->count()-1);
     }
+
     settings.setValue("countOfPaths", std::to_string(ui->paths->count()));
     settings.setValue("currentPathIndex", std::to_string(ui->paths->currentIndex()));
 
@@ -157,10 +148,29 @@ void MainWindow::on_pushButton_clicked()
 
 
 
-
+///
+/// \brief MainWindow::on_paths_activated
+/// \param index
+///
 void MainWindow::on_paths_activated(int index)
 {
     settings.setValue("currentPathIndex", std::to_string(index));
     settings.save();
 }
+
+///
+/// \brief MainWindow::on_runScan_clicked
+///
+void MainWindow::on_runScan_clicked()
+{
+    auto listFiles { scanDirectory(ui->paths->itemText(ui->paths->currentIndex())) };
+
+    std::cout << "count: " << listFiles.size() << std::endl;
+
+    for(auto&& elem: listFiles){
+        std::cout << "name: " << elem.fileName().toStdString() << std::endl;
+    }
+
+}
+
 

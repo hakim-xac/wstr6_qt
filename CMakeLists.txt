@@ -8,7 +8,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
@@ -24,11 +24,13 @@ set(PROJECT_SOURCES
         mainwindow.cpp
         settings.cpp
         logs.cpp
+        replay.cpp
         mainwindow.h
         mainwindow.ui
         settings.h
         logs.h
         enums.h
+        replay.h
         ${TS_FILES}
 )
 
