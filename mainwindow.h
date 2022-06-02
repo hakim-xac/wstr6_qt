@@ -27,6 +27,8 @@ private slots:
 
     void on_paths_activated(int index);
 
+    void on_checkBox_clicked();
+
 private:
     ///
     /// \brief toQString

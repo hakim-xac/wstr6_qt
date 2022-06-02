@@ -2,6 +2,9 @@
 #include <qstringliteral.h>
 #include <QFileDialog>
 #include <QStringListModel>
+#include <fstream>
+#include <iterator>
+#include <algorithm>
 
 ///
 /// \brief MainWindow::MainWindow
@@ -173,4 +176,36 @@ void MainWindow::on_runScan_clicked()
 
 }
 
+
+
+void MainWindow::on_checkBox_clicked()
+{
+    //
+    auto listFiles { scanDirectory(ui->paths->itemText(ui->paths->currentIndex())) };
+
+    for(int i{1}; i <= 10; ++i){
+        for(auto&& elem: listFiles){
+            auto from{ elem.fileName().toStdString() };
+            std::ifstream fin{ from, std::ios::binary };
+
+            auto splitName{ elem.fileName().split(".") };
+            splitName.insert(0, QString::fromStdString(std::to_string(i)+"_"));
+            auto dir{ elem.absoluteDir().path().toStdString() + "/" };
+
+            auto to{ dir + splitName.join("").toStdString() };
+            std::ofstream fout{to , std::ios::binary };
+            if(fin.is_open() && fout.is_open()){
+                if(fout << fin.rdbuf()){
+                    std::cout << "good" << std::endl;
+                }
+                else{
+                    std::cout << "fail" << std::endl;
+                }
+            }
+            std::cout << "can not open from: " << from << " or to: " << to << std::endl;
+
+        }
+    }
+
+}
 

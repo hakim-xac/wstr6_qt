@@ -1,7 +1,6 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
-#include "./ui_mainwindow.h"
 #include "./logs.h"
 #include <string_view>
 #include <string>
@@ -9,12 +8,11 @@
 #include <queue>
 #include <map>
 #include <QDir>
+#include <QCoreApplication>
+#include <QComboBox>
 
 namespace WSTR {
 
-QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow; }
-QT_END_NAMESPACE
 
 class Settings{
 
