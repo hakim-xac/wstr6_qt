@@ -64,7 +64,14 @@ private:
     ///
     void initPathsView();
 
-    QFileInfoList scanDirectory(const QString& pathDir);
+    ///
+    /// \brief scanDirectory
+    /// \param pathDir
+    /// \param filter
+    /// \return
+    ///
+    template <typename TypeDirName, typename TypeFilter = QString >
+    QFileInfoList scanDirectory(TypeDirName&& pathDir, TypeFilter&& filter = QString("*.wotreplay"));
 
 private:
     Ui::MainWindow *ui;
@@ -134,6 +141,26 @@ void MainWindow
         return;
     }
     ui->statusBar->setText(std::move(new_str));
+
+}
+
+///
+/// \brief MainWindow::scanDirectory
+/// \param pathDir
+/// \param filter
+/// \return
+///
+template <typename TypeDirName, typename TypeFilter>
+QFileInfoList MainWindow
+::scanDirectory(TypeDirName&& pathDir, TypeFilter&& filter){
+
+    QDir dir{ QString(std::forward<TypeDirName>(pathDir)) };
+    dir.setFilter(QDir::Files | QDir::NoDotAndDotDot | QDir::NoSymLinks);
+    QStringList filters(std::forward<TypeFilter>(filter));
+     dir.setNameFilters(filters);
+
+    dir.setSorting(QDir::Size | QDir::Reversed);
+    return dir.entryInfoList();
 
 }
 

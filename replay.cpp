@@ -2,28 +2,7 @@
 
 namespace WSTR{
 
-///
-/// \brief replay::Replay
-///
-Replay::Replay()
-    : validity_     ()
-    , id_           ()
-    , size_         ()
-    , respawn_      ()
-    , duration_     ()
-    , vinnerTeam_   ()
-    , dateTime_     ()
-    , vehicle_      ()
-    , mapName_      ()
-    , userName_     ()
-    , testName_     ()
-    , replayName_   ()
-    , alliedTeam_   (30)
-    , opposingTeam_ (30)
-{
-    static size_t id{};
-    id_ = id++;
-}
+
 
 ///
 /// \brief Replay::getValidity
@@ -32,6 +11,15 @@ Replay::Replay()
 bool Replay::getValidity() const
 {
     return validity_;
+}
+
+///
+/// \brief Replay::getIsReplay
+/// \return
+///
+bool Replay::getIsReplay() const
+{
+    return isReplay_;
 }
 
 ///
@@ -140,6 +128,15 @@ std::string_view Replay::getReplayName() const
 void Replay::setValidity(bool newValidity)
 {
     validity_ = newValidity;
+}
+
+///
+/// \brief Replay::setIsReplay
+/// \param newIsReplay
+///
+void Replay::setIsReplay(bool newIsReplay)
+{
+    isReplay_ = newIsReplay;
 }
 
 ///

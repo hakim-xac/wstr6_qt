@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iterator>
 #include <algorithm>
+#include <string>
 
 ///
 /// \brief MainWindow::MainWindow
@@ -102,22 +103,6 @@ void MainWindow::initPathsView()
 }
 
 ///
-/// \brief MainWindow::scanDirectory
-/// \param pathDir
-/// \return
-///
-QFileInfoList MainWindow::scanDirectory(const QString& pathDir)
-{
-QDir dir{ pathDir };
-dir.setFilter(QDir::Files | QDir::NoDotAndDotDot | QDir::NoSymLinks);
-QStringList filters("*.wotreplay");
- dir.setNameFilters(filters);
-
-dir.setSorting(QDir::Size | QDir::Reversed);
-return dir.entryInfoList();
-}
-
-///
 /// \brief MainWindow::on_pushButton_clicked
 ///
 void MainWindow::on_pushButton_clicked()
@@ -161,21 +146,6 @@ void MainWindow::on_paths_activated(int index)
     settings.save();
 }
 
-///
-/// \brief MainWindow::on_runScan_clicked
-///
-void MainWindow::on_runScan_clicked()
-{
-    auto listFiles { scanDirectory(ui->paths->itemText(ui->paths->currentIndex())) };
-
-    std::cout << "count: " << listFiles.size() << std::endl;
-
-    for(auto&& elem: listFiles){
-        std::cout << "name: " << elem.fileName().toStdString() << std::endl;
-    }
-
-}
-
 
 
 void MainWindow::on_checkBox_clicked()
@@ -185,26 +155,56 @@ void MainWindow::on_checkBox_clicked()
 
     for(int i{1}; i <= 10; ++i){
         for(auto&& elem: listFiles){
-            auto from{ elem.fileName().toStdString() };
+            auto from{ elem.absoluteFilePath().toStdString() };
             std::ifstream fin{ from, std::ios::binary };
-
+            if(!fin.is_open()){
+                std::cout << "can not open file: " << from << std::endl;
+                continue;
+            }
             auto splitName{ elem.fileName().split(".") };
-            splitName.insert(0, QString::fromStdString(std::to_string(i)+"_"));
+            splitName.insert(1, QString::fromStdString("_"+std::to_string(i)+"."));
             auto dir{ elem.absoluteDir().path().toStdString() + "/" };
 
             auto to{ dir + splitName.join("").toStdString() };
             std::ofstream fout{to , std::ios::binary };
-            if(fin.is_open() && fout.is_open()){
-                if(fout << fin.rdbuf()){
-                    std::cout << "good" << std::endl;
-                }
-                else{
-                    std::cout << "fail" << std::endl;
-                }
+
+            bool isCreate{};
+            if(fout.is_open()){
+                fout << fin.rdbuf();
+                if(fout.good()) isCreate = true;
             }
-            std::cout << "can not open from: " << from << " or to: " << to << std::endl;
+
+            std::cout << "status fileopen: " << std::boolalpha << isCreate << " filename: " << to << std::endl;
+            fin.close();
+            fout.close();
 
         }
+    }
+
+}
+
+///
+/// \brief MainWindow::on_runScan_clicked
+///
+void MainWindow::on_runScan_clicked()
+{
+    QString filters{ "*.wotreplay" };
+    auto listFiles { scanDirectory(ui->paths->itemText(ui->paths->currentIndex()), filters) };
+
+    if(listFiles.size() == 0){
+        toStatusBar(("Файлы \""+filters+"\" в данной папке отсутствуют!").toStdString());
+        return;
+    }
+
+    std::vector<WSTR::Replay> vecReplays(listFiles.size());
+
+    size_t i{};
+    for(auto&& elem: vecReplays){
+        elem = WSTR::Replay(listFiles[i++].absoluteFilePath().toStdString());
+        std::cout << "id: " << elem.getId() << "\n";
+        std::cout << "size: " << elem.getSize() << "\n";
+        std::cout << "filename: " << elem.getReplayName() << "\n";
+        std::cout << "validity: " << elem.getValidity() << "\n" << std::endl;
     }
 
 }
