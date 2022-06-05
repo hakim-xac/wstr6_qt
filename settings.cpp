@@ -16,7 +16,7 @@ namespace WSTR {
 ///
 bool Settings::saveToFile(std::stringstream& buffer) const
 {
-    std::ofstream fs(settingFileName.data());
+    std::ofstream fs(settingFileName_.data());
     if(!fs.is_open()) return false;
     fs.clear();
     if(!(fs << buffer.str())){
@@ -149,6 +149,10 @@ Settings::~Settings()
     save();
 }
 
+std::string_view Settings::getVersionApp(){
+    return versionApplication_;
+}
+
 
 ///
 /// \brief Settings::save
@@ -178,10 +182,10 @@ bool Settings::load()
 
     logs.pushAndFlash("Start Settings.load()", WSTR::AppType::Debug);
 
-    std::ifstream fs(settingFileName.data());
+    std::ifstream fs(settingFileName_.data());
     if(!fs.is_open()){
         std::stringstream ss{"Can`t open settings file: "};
-        ss << settingFileName.data();
+        ss << settingFileName_.data();
         logs.pushAndFlash(ss.str(), WSTR::AppType::Debug);
         return false;
     }

@@ -76,7 +76,11 @@ private:            // PRIVATE STATIC VARIABLES AND FUNCTIONS
     ///
     ///
     ///
-    static constexpr std::string_view settingFileName{ "./settings.dat" };
+    static constexpr std::string_view settingFileName_{ "./settings.dat" };
+
+    ///
+    ///
+    static constexpr std::string_view versionApplication_{ "6.0.0.0" };
 
     ///
     /// \brief checkDirExists
@@ -170,6 +174,12 @@ public:             // PUBLIC FUNCTIONS
     /// \param list
     ///
     void PathFromQComboBoxToPathsBufer(const QComboBox& list);
+
+    ///
+    /// \brief getVersionApp
+    /// \return
+    ///
+    std::string_view getVersionApp();
 };
 
 

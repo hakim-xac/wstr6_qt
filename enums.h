@@ -10,11 +10,14 @@ enum class AppType{
     Release, Debug
 };
 
-
+///
+/// \brief The SelectBase enum
+///
 enum class SelectBase{
     General
     , Paths
 };
+
 
 }
 

@@ -198,14 +198,19 @@ void MainWindow::on_runScan_clicked()
 
     std::vector<WSTR::Replay> vecReplays(listFiles.size());
 
-    size_t i{};
-    for(auto&& elem: vecReplays){
-        elem = WSTR::Replay(listFiles[i++].absoluteFilePath().toStdString());
-        std::cout << "id: " << elem.getId() << "\n";
-        std::cout << "size: " << elem.getSize() << "\n";
-        std::cout << "filename: " << elem.getReplayName() << "\n";
-        std::cout << "validity: " << elem.getValidity() << "\n" << std::endl;
+    {
+        size_t i{};
+        std::for_each(std::begin(vecReplays), std::end(vecReplays), [&listFiles, &i](auto&& elem){
+
+            elem = WSTR::Replay(listFiles[i].absoluteFilePath().toStdString(), i);
+            std::cout << "i: " << i << std::endl;
+            ++i;
+        });
     }
+
+
+
+
 
 }
 
