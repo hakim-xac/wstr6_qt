@@ -16,6 +16,7 @@ enum class AppType{
 enum class SelectBase{
     General
     , Paths
+    , Headers
 };
 
 

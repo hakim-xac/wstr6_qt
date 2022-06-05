@@ -9,6 +9,28 @@
 
 namespace WSTR {
 
+
+
+///
+/// \brief Settings::Settings
+///
+Settings::Settings()
+    : default_()
+    , countOfPaths_()
+    , base_()
+    , bd_(default_.bd_)
+    , pathsList_()
+    , headerList_(default_.header_) {}
+
+
+///
+/// \brief Settings::~Settings
+///
+Settings::~Settings()
+{
+    save();
+}
+
 ///
 /// \brief Settings::saveToFile
 /// \param buffer
@@ -67,9 +89,41 @@ bool Settings::parse(const std::vector<std::string> &configBuffer)
             }
             sb = WSTR::SelectBase::Paths;
         }
+        else if(key.starts_with("header_"sv)) {
+
+            if(!checkHeaderItem(key, value)){
+                headerList_.clear();
+                headerList_ = default_.header_;
+
+                std::stringstream ss{ "if(!checkHeaderItem(key, value)) == false\n" };
+                ss << "key: " << key << " value: " << value << std::endl;
+                logs.pushAndFlash(ss.str(), WSTR::AppType::Debug);
+                return false;
+            }
+
+            if(!setValue(key, value, WSTR::SelectBase::Headers)){
+                std::stringstream ss{ "if(!setValue(key, value, WSTR::SelectBase::Headers)) == false\n" };
+                logs.pushAndFlash(ss.str(), WSTR::AppType::Debug);
+                return false;
+            }
+            sb = WSTR::SelectBase::Headers;
+        }
         else {
+
             if(!setValue(key, value)){
                 std::stringstream ss{ "if(!setValue(key, value)) == false\n" };
+                logs.pushAndFlash(ss.str(), WSTR::AppType::Debug);
+                return false;
+            }
+            auto&& [val, isType] = toType<size_t>(value);
+            if(!isType) {
+                std::stringstream ss{ "auto&& [val, isType] = toType<int>(value);\
+                                      if(!isType) == false\n" };
+                logs.pushAndFlash(ss.str(), WSTR::AppType::Debug);
+                return false;
+            }
+            if(!checkIsRange(0ull, 100ull, val)){
+                std::stringstream ss{ "if(!checkIsRange(0, 100, value)) == false\n" };
                 logs.pushAndFlash(ss.str(), WSTR::AppType::Debug);
                 return false;
             }
@@ -101,9 +155,33 @@ std::map<std::string, std::string> *Settings::selectBase(SelectBase sb)
     case WSTR::SelectBase::Paths:
     return &pathsList_;
     break;
+    case WSTR::SelectBase::Headers:
+    return &headerList_;
+    break;
     default:
         return nullptr;
     }
+}
+
+///
+/// \brief Settings::checkHeaderItem
+/// \param key
+/// \param value
+/// \return
+///
+bool Settings::checkHeaderItem(std::string_view key, std::string_view value)
+{
+    using namespace std::literals;
+    auto pos{ key.find_first_of('_') };
+    if(pos == std::string_view::npos) return false;
+    auto s{ key.substr(0, pos + 1) };
+    if (s != "header_"sv) return false;
+    auto&& [elem, isType] = toType<size_t>(key.substr(pos+1));
+    if(!isType) return false;
+    if(!checkIsRange(minimumInSize_t, maximumInSize_t_, elem)) return false;
+    if(!checkIsHeaderValue(value)) return false;
+
+    return true;
 }
 
 ///
@@ -131,26 +209,21 @@ void Settings::PathFromQComboBoxToPathsBufer(const QComboBox& list)
 }
 
 ///
-/// \brief Settings::Settings
+/// \brief Settings::getVersionApp
+/// \return
 ///
-Settings::Settings()
-    : default_()
-    , countOfPaths_()
-    , base_()
-    , bd_(default_.bd_)
-    , pathsList_() {}
-
-
-///
-/// \brief Settings::~Settings
-///
-Settings::~Settings()
-{
-    save();
-}
-
 std::string_view Settings::getVersionApp(){
     return versionApplication_;
+}
+
+///
+/// \brief Settings::checkIsHeaderValue
+/// \param value
+/// \return
+///
+bool Settings::checkIsHeaderValue(std::string_view value)
+{
+    return std::find(std::begin(default_.headerArray_), std::end(default_.headerArray_), value) != std::end(default_.headerArray_);
 }
 
 
@@ -167,6 +240,10 @@ bool Settings::save() const
     }
 
     for(auto&& [key, value]: pathsList_){
+        ss << key << ":" << value << "\n";
+    }
+
+    for(auto&& [key, value]: headerList_){
         ss << key << ":" << value << "\n";
     }
 

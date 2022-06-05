@@ -61,7 +61,7 @@ void MainWindow::initPathsView()
         settings.logs.pushAndFlash("isCountPath == true", WSTR::AppType::Debug);
 
         QStringList paths;
-        auto&& [countPaths_i, isCountPaths_s] = toType<int>(countPaths_s);
+        auto&& [countPaths_i, isCountPaths_s] = settings.toType<int>(countPaths_s);
         if(!isCountPaths_s){
 
             std::stringstream ss{"auto [countPaths_i, isCountPaths_s] = toType<int>(countPaths_s);\n"};
@@ -84,7 +84,8 @@ void MainWindow::initPathsView()
             auto [currentPathIndex_s, isCurrentPathIndex] = settings.getValue("currentPathIndex"s);
             if(isCurrentPathIndex){
 
-            auto [currentIndex, isCurrentIndex] = toType<int>(currentPathIndex_s);
+            auto [currentIndex, isCurrentIndex] = settings.toType<int>(currentPathIndex_s);
+
             if(isCurrentIndex) ui->paths->setCurrentIndex(currentIndex);
                 settings.save();
             }
@@ -99,6 +100,20 @@ void MainWindow::initPathsView()
     ui->paths->addItem(settings.getDefaultPath());
 
     settings.logs.pushAndFlash("end MainWindow::initPathsView()", WSTR::AppType::Debug);
+
+}
+
+///
+/// \brief MainWindow::replaysToTable
+/// \param table
+/// \param vec
+///
+ void MainWindow::replaysToTable(QTableWidget& table, const std::vector<WSTR::Replay> &vec)
+{
+    table.setRowCount(static_cast<int>(vec.size()));
+    //table.setColumnCount(headerList.size());
+    table.horizontalHeader();
+    //table.setHorizontalHeaderLabels(Wstr::HeaderStringNameToList(headerList, settings));
 
 }
 
@@ -208,7 +223,7 @@ void MainWindow::on_runScan_clicked()
         });
     }
 
-
+    //replaysToTable(*ui->grid, vecReplays);
 
 
 

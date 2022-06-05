@@ -39,15 +39,6 @@ private:
     static std::pair< QString, bool > toQString(Type&& str);
 
     ///
-    /// \brief toType
-    /// \param str
-    /// \return
-    ///
-    template <typename OutType, typename Type>
-    static std::pair< OutType, bool > toType(Type&& str);
-
-
-    ///
     /// \brief toStatusBar
     /// \param in
     ///
@@ -72,6 +63,13 @@ private:
     ///
     template <typename TypeDirName, typename TypeFilter = QString >
     QFileInfoList scanDirectory(TypeDirName&& pathDir, TypeFilter&& filter = QString("*.wotreplay"));
+
+    ///
+    /// \brief replaysToTable
+    /// \param table
+    /// \param vec
+    ///
+    void replaysToTable(QTableWidget& table, const std::vector<WSTR::Replay>& vec);
 
 private:
     Ui::MainWindow *ui;
@@ -102,26 +100,6 @@ std::pair< QString, bool > MainWindow
     }
     return { QString::fromStdString(ss.str()), true };
 }
-
-///
-/// \brief MainWindow::toType
-/// \param str
-/// \return
-///
-template <typename OutType, typename Type>
-std::pair< OutType, bool > MainWindow
-::toType(Type&& str){
-    std::stringstream ss;
-    ss << std::forward<Type>(str);
-    if(ss.fail()) return { OutType(), false };
-
-    OutType tmp{};
-    ss >> tmp;
-    if(ss.fail()) return { OutType(), false };
-
-    return { tmp, true };
-}
-
 
 ///
 /// \brief MainWindow::toStatusBar

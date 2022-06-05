@@ -116,7 +116,7 @@ private:
     ///
     /// \brief parseFileWotreplay
     /// \param filename
-    /// \param upd
+    /// \param id
     /// \return
     ///
     template <typename TypeFileName>

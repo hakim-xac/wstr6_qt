@@ -10,6 +10,7 @@
 #include <QDir>
 #include <QCoreApplication>
 #include <QComboBox>
+#include <array>
 
 namespace WSTR {
 
@@ -30,6 +31,33 @@ class Settings{
             { "countOfPaths", "0" }
             , { "currentPathIndex", "0" }
         };
+
+        const std::map<std::string, std::string> header_{
+            { "header_1", "id" }
+            , { "header_2", "size" }
+            , { "header_3", "validity" }
+            , { "header_4", "hasmods" }
+            , { "header_5", "respawn" }
+        };
+
+        static constexpr std::array<std::string_view, 17> headerArray_{
+            "id"
+            , "size"
+            , "validity"
+            , "hasmods"
+            , "respawn"
+            , "duration"
+            , "winnerteam"
+            , "datetime"
+            , "vehicle"
+            , "mapname"
+            , "username"
+            , "testname"
+            , "replayname"
+            , "clientversion"
+        };
+
+
     };
 
 
@@ -52,13 +80,21 @@ private:            // PRIVATE VARIABLES
     ///
     size_t countOfPaths_;
 
+    ///
+    /// \brief minimumInSize_t_
+    ///
+    static constexpr size_t minimumInSize_t{};
+
+    ///
+    /// \brief maximumInSize_t_
+    ///
+    static constexpr size_t maximumInSize_t_{ 100 };
 
     ///
     /// \brief base_
     ///
     ///
     std::queue<std::string> base_;
-
 
     ///
     ///
@@ -69,6 +105,11 @@ private:            // PRIVATE VARIABLES
     /// \brief pathsList_
     ///
     std::map<std::string, std::string> pathsList_;
+
+    ///
+    /// \brief headerList_
+    ///
+    std::map<std::string, std::string> headerList_;
 
 
 private:            // PRIVATE STATIC VARIABLES AND FUNCTIONS
@@ -111,6 +152,13 @@ private:            // PRIVATE FUNCTIONS
     ///
     bool parse(const std::vector<std::string>& configBuffer);
 
+    ///
+    /// \brief checkValue
+    /// \param key
+    /// \param value
+    /// \param sb
+    /// \return
+    ///
     template <typename KeyType, typename ValueType>
     bool checkValue(KeyType&& key, ValueType&& value, WSTR::SelectBase sb = WSTR::SelectBase::General);
 
@@ -120,6 +168,22 @@ private:            // PRIVATE FUNCTIONS
     /// \return
     ///
     std::map<std::string, std::string>* selectBase(WSTR::SelectBase sb = WSTR::SelectBase::General);
+
+    ///
+    /// \brief checkHeaderItem
+    /// \param key
+    /// \param value
+    /// \return
+    ///
+    bool checkHeaderItem(std::string_view key, std::string_view value);
+
+    ///
+    /// \brief checkIsHeaderValue
+    /// \param value
+    /// \return
+    ///
+    bool checkIsHeaderValue(std::string_view value);
+
 
 public:             // PUBLIC VARIABLES
     Logs logs{ std::cout };
@@ -150,7 +214,7 @@ public:             // PUBLIC FUNCTIONS
     ///
     template <typename Type = std::string>
     std::pair<Type, bool>
-    getValue(std::string key, WSTR::SelectBase sb = WSTR::SelectBase::General);
+    getValue(const std::string& key, WSTR::SelectBase sb = WSTR::SelectBase::General);
 
     ///
     /// \brief setValue
@@ -180,6 +244,25 @@ public:             // PUBLIC FUNCTIONS
     /// \return
     ///
     std::string_view getVersionApp();
+
+    ///
+    /// \brief toType
+    /// \param str
+    /// \return
+    ///
+    template <typename OutType, typename Type>
+    static std::pair< OutType, bool > toType(Type&& str);
+
+    ///
+    /// \brief checkIsRange
+    /// \param begin
+    /// \param end
+    /// \param item
+    /// \return
+    ///
+    template <typename RangeBegin, typename RangeEnd, typename ItemType>
+    static bool checkIsRange(RangeBegin&& begin, RangeEnd&& end, ItemType&& item);
+
 };
 
 
@@ -193,7 +276,7 @@ public:             // PUBLIC FUNCTIONS
 ///
 template <typename Type>
 std::pair<Type, bool> Settings
-::getValue(std::string key, WSTR::SelectBase sb){
+::getValue(const std::string& key, WSTR::SelectBase sb){
     auto base{ selectBase(sb) };
     if(!base) return { Type(), false };
     try{
@@ -264,6 +347,39 @@ bool Settings::checkValue(KeyType&& key, ValueType&& value, SelectBase sb)
         return false;
     }
     return true;
+}
+
+///
+/// \brief Settings::toType
+/// \param str
+/// \return
+///
+template <typename OutType, typename Type>
+std::pair< OutType, bool > Settings
+::toType(Type&& str){
+    std::stringstream ss;
+    ss << std::forward<Type>(str);
+    if(ss.fail()) return { OutType(), false };
+
+    OutType tmp{};
+    ss >> tmp;
+    if(ss.fail()) return { OutType(), false };
+
+    return { tmp, true };
+}
+
+
+
+template <typename RangeBegin, typename RangeEnd, typename ItemType>
+bool Settings
+::checkIsRange(RangeBegin&& begin, RangeEnd&& end, ItemType&& item){
+    using decay_begin = std::decay_t<RangeBegin>;
+    using decay_end = std::decay_t<RangeEnd>;
+    using decay_item = std::decay_t<ItemType>;
+
+    static_assert(std::is_same_v<decay_begin, decay_end>
+            && std::is_same_v<decay_begin, decay_item>, "RangeBegin && RangeEnd && ItemType --> Must be of the same type!");
+    return item >= begin && item <= end;
 }
 
 
