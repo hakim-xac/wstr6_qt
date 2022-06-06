@@ -68,8 +68,24 @@ private:
     /// \brief replaysToTable
     /// \param table
     /// \param vec
+    /// \return
     ///
-    void replaysToTable(QTableWidget& table, const std::vector<WSTR::Replay>& vec);
+    bool replaysToTable(QTableWidget& table, const std::vector<WSTR::Replay>& vec);
+
+    ///
+    /// \brief setHeaderInTable
+    /// \param table
+    /// \return
+    ///
+    const std::pair<std::map<std::string, int>, bool> setHeaderInTable(QTableWidget& table);
+
+    ///
+    /// \brief setCurrentItem
+    /// \param table
+    /// \param vec
+    /// \param mp
+    ///
+    void setCurrentItem(QTableWidget& table, const std::vector<WSTR::Replay> &vec, const std::map<std::string, int>& mp);
 
 private:
     Ui::MainWindow *ui;

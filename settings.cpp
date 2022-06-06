@@ -217,6 +217,15 @@ std::string_view Settings::getVersionApp(){
 }
 
 ///
+/// \brief Settings::getCountHeaderList
+/// \return
+///
+size_t Settings::getCountHeaderList()
+{
+    return headerList_.size();
+}
+
+///
 /// \brief Settings::checkIsHeaderValue
 /// \param value
 /// \return

@@ -38,6 +38,8 @@ class Settings{
             , { "header_3", "validity" }
             , { "header_4", "hasmods" }
             , { "header_5", "respawn" }
+            , { "header_6", "mapname" }
+            , { "header_7", "testname" }
         };
 
         static constexpr std::array<std::string_view, 17> headerArray_{
@@ -262,6 +264,12 @@ public:             // PUBLIC FUNCTIONS
     ///
     template <typename RangeBegin, typename RangeEnd, typename ItemType>
     static bool checkIsRange(RangeBegin&& begin, RangeEnd&& end, ItemType&& item);
+
+    ///
+    /// \brief getCountHeaderList
+    /// \return
+    ///
+    size_t getCountHeaderList();
 
 };
 
