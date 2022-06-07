@@ -15,27 +15,37 @@ class Replay
 
 private:            // PRIVATE VARIABLES
 
-    bool validity_{};
-    bool isReplay_{};
-    bool hasMods_{};
-    size_t userID_{};
-    size_t arenaCreateTime_{};
-    size_t id_{};
-    size_t size_{};
-    size_t respawn_{};
-    size_t duration_{};
-    size_t winnerTeam_{};
-    std::string dateTime_{};
-    std::string vehicle_{};
-    std::string mapName_{};
-    std::string userName_{};
-    std::string testName_{};
-    std::string replayName_{};
-    std::string clientVersionFromXML_{};
-
 
     std::vector<std::string> alliedTeam_{30};
     std::vector<std::string> opposingTeam_{30};
+
+    static inline const std::string defaultStringEmpty_ = "-";
+    static constexpr size_t defaultSize_tEmpty_{ 0 };
+    static constexpr bool defaultBoolEmpty_{ false };
+
+    std::map<std::string, std::string> dataString_{
+        { "dateTime", defaultStringEmpty_ }
+        , { "vehicle", defaultStringEmpty_ }
+        , { "mapName", defaultStringEmpty_ }
+        , { "userName", defaultStringEmpty_ }
+        , { "testName", defaultStringEmpty_ }
+        , { "replayName", defaultStringEmpty_ }
+        , { "clientVersionFromXML", defaultStringEmpty_ }
+    };
+    std::map<std::string, size_t> dataSize_t_{
+        { "userID", defaultSize_tEmpty_ }
+        , { "arenaCreateTime", defaultSize_tEmpty_ }
+        , { "id", defaultSize_tEmpty_ }
+        , { "size", defaultSize_tEmpty_ }
+        , { "respawn", defaultSize_tEmpty_ }
+        , { "duration", defaultSize_tEmpty_ }
+        , { "winnerTeam", defaultSize_tEmpty_ }
+    };
+    std::map<std::string, bool> dataBool_{
+        { "validity", defaultBoolEmpty_ }
+        , { "isReplay", defaultBoolEmpty_ }
+        , { "hasMods", defaultBoolEmpty_ }
+    };
 
 public:             // PUBLIC FUNCTIONS
     Replay() = default;
@@ -53,35 +63,82 @@ public:             // PUBLIC FUNCTIONS
     size_t getRespawn() const;
     size_t getDuration() const;
     size_t getWinnerTeam() const;
-    std::string_view getDateTime() const;
-    std::string_view getVehicle() const;
-    std::string_view getMapName() const;
-    std::string_view getUserName() const;
-    std::string_view getTestName() const;
-    std::string_view getReplayName() const;
-    std::string_view getClientVersionFromXML() const;
+    std::string getDateTime() const;
+    std::string getVehicle() const;
+    std::string getMapName() const;
+    std::string getUserName() const;
+    std::string getTestName() const;
+    std::string getReplayName() const;
+    std::string getClientVersionFromXML() const;
 
 
-    void setValidity(bool newValidity);
-    void setIsReplay(bool newIsReplay);
-    void setIsHasMods(bool newHasMods);
-    void setUserID(long long newUserID);
-    void setArenaCreateTime(long long newArenaCreateTime);
-    void setId(size_t newId);
-    void setSize(size_t newSize);
-    void setRespawn(size_t newRespawn);
-    void setDuration(size_t newDuration);
-    void setWinnerTeam(size_t newWinnerTeam);
-    void setDateTime(const std::string &newDateTime);
-    void setVehicle(const std::string &newVehicle);
-    void setMapName(const std::string &newMapName);
-    void setUserName(const std::string &newUserName);
-    void setTestName(const std::string &newTestName);
-    void setReplayName(const std::string &newReplayName);
-    void setClientVersionFromXML(const std::string &newClientVersionFromXML);
+    bool setValidity(bool newValidity);
+    bool setIsReplay(bool newIsReplay);
+    bool setIsHasMods(bool newHasMods);
+    bool setUserID(size_t newUserID);
+    bool setArenaCreateTime(size_t newArenaCreateTime);
+    bool setId(size_t newId);
+    bool setSize(size_t newSize);
+    bool setRespawn(size_t newRespawn);
+    bool setDuration(size_t newDuration);
+    bool setWinnerTeam(size_t newWinnerTeam);
+    bool setDateTime(const std::string &newDateTime);
+    bool setVehicle(const std::string &newVehicle);
+    bool setMapName(const std::string &newMapName);
+    bool setUserName(const std::string &newUserName);
+    bool setTestName(const std::string &newTestName);
+    bool setReplayName(const std::string &newReplayName);
+    bool setClientVersionFromXML(const std::string &newClientVersionFromXML);
+
+
+public:
+
+
+    ///
+    /// \brief getValue
+    /// \param key
+    /// \return
+    ///
+    template <typename Type>
+    constexpr std::decay_t<Type> getValue(std::string_view key) const;
+
+    ///
+    /// \brief isGetValue
+    /// \param key
+    /// \return
+    ///
+    template <typename Type>
+    constexpr std::pair<std::decay_t<Type>, bool> isGetValue(std::string_view key) const;
+
+    ///
+    /// \brief setValue
+    /// \param key
+    /// \param value
+    /// \return
+    ///
+    template <typename Type>
+    void setValue(const std::string& key, Type&& newValue);
+
+    ///
+    /// \brief checkValue
+    /// \param key
+    /// \param value
+    /// \return
+    ///
+    template <typename Type>
+    constexpr bool checkValue(const std::string& key) const;
+
+    ///
+    /// \brief setCheckValue
+    /// \param key
+    /// \param newValue
+    ///
+    template <typename Type>
+    bool setCheckValue(const std::string& key, Type&& newValue);
 
 
 private:
+
 
     ///
     /// \brief fstreamSize
@@ -156,7 +213,7 @@ Replay
 ::Replay(TypeFileName&& filename, size_t id){
 
     if(!parseFileWotreplay(std::forward<TypeFileName>(filename), id)) return;
-    isReplay_ = true;
+    setIsReplay(true);
 
 }
 
@@ -254,5 +311,118 @@ constexpr std::decay_t<Type> Replay
     }
 }
 
+///
+/// \brief Replay::getValue
+/// \param key
+/// \return
+///
+template <typename Type>
+constexpr std::decay_t<Type> Replay::getValue(std::string_view key) const{
+    using type = std::decay_t<Type>;
+    auto&& [value, isValue] = isGetValue<type>(key);
+    if(isValue) return value;
+    return type();
+}
+
+///
+/// \brief Replay::isGetValue
+/// \param key
+/// \return
+///
+template <typename Type>
+constexpr std::pair<std::decay_t<Type>, bool> Replay::isGetValue(std::string_view key) const{
+    using type = std::decay_t<Type>;
+
+    constexpr bool typeIsBool   { std::is_same_v<type, bool>        };
+    constexpr bool typeIsString { std::is_same_v<type, std::string> };
+    constexpr bool typeIsSize_t { std::is_same_v<type, size_t>      };
+
+    if constexpr (typeIsBool){
+        try{
+            return { dataBool_.at(key.data()), true };
+        }
+        catch(std::out_of_range ex){
+            assert("ERROR !!! std::out_of_range!");
+            return { type(), false };
+        }
+    }
+    else if constexpr (typeIsString) {
+        try{
+            return { dataString_.at(key.data()), true };
+        }
+        catch(...){
+            assert("ERROR !!! std::out_of_range!");
+            return { type(), false };
+        }
+    }
+    else if constexpr (typeIsSize_t) {
+        try{
+            return { dataSize_t_.at(key.data()), true };
+        }
+        catch(...){
+            assert("ERROR !!! std::out_of_range!");
+            return { type(), false };
+        }
+    }
+    static_assert(typeIsBool || typeIsString || typeIsSize_t, "Invalid type specified!");
+    return { type(), false };
+}
+
+///
+/// \brief Replay::setValue
+/// \param key
+/// \param newValue
+///
+template <typename Type>
+void Replay::setValue(const std::string& key, Type&& newValue){
+
+    using namespace std::literals;
+    using type = std::decay_t<Type>;
+
+    constexpr bool typeIsBool   { std::is_same_v<type, bool>        };
+    constexpr bool typeIsString { std::is_same_v<type, std::string> };
+    constexpr bool typeIsSize_t { std::is_same_v<type, size_t>      };
+
+    assert(checkValue<type>(key));
+
+    if constexpr (typeIsBool){
+        dataBool_[key] = std::forward<Type>(newValue);
+    }
+    else if constexpr (typeIsString) {
+        dataString_[key] = std::forward<Type>(newValue);
+    }
+    else if constexpr (typeIsSize_t) {
+        dataSize_t_[key] = std::forward<Type>(newValue);
+    }
+}
+
+///
+/// \brief Replay::checkValue
+/// \param key
+/// \param value
+/// \return
+///
+template <typename Type>
+constexpr bool Replay::checkValue(const std::string& key) const {
+    auto&& [_, isValue] = isGetValue<std::decay_t<Type>>(key);
+    return isValue;
+}
+
+///
+/// \brief Replay::setCheckValue
+/// \param key
+/// \param newValue
+///
+template <typename Type>
+bool Replay::setCheckValue(const std::string& key, Type&& newValue){
+
+    Type value{ std::forward<Type>(newValue) };
+
+    setValue<Type>(key, std::forward<Type>(newValue));
+    auto&&[afterValue, isValue] = isGetValue<Type>(key);
+
+    if(!isValue) return false;
+    return afterValue == value;
+}
 }
 #endif // REPLAY_H

@@ -14,7 +14,7 @@ namespace WSTR{
 ///
 bool Replay::getIsValidity() const
 {
-    return validity_;
+    return getValue<bool>("validity");
 }
 
 ///
@@ -23,7 +23,7 @@ bool Replay::getIsValidity() const
 ///
 bool Replay::getIsReplay() const
 {
-    return isReplay_;
+    return getValue<bool>("isReplay");
 }
 
 ///
@@ -32,7 +32,7 @@ bool Replay::getIsReplay() const
 ///
 bool Replay::getIsHasMods() const
 {
-    return hasMods_;
+    return getValue<bool>("hasMods");
 }
 
 ///
@@ -41,7 +41,7 @@ bool Replay::getIsHasMods() const
 ///
 size_t Replay::getUserID() const
 {
-    return userID_;
+    return getValue<size_t>("userID");
 }
 
 ///
@@ -50,7 +50,7 @@ size_t Replay::getUserID() const
 ///
 size_t Replay::getArenaCreateTime() const
 {
-    return arenaCreateTime_;
+    return getValue<size_t>("arenaCreateTime");
 }
 
 ///
@@ -59,7 +59,7 @@ size_t Replay::getArenaCreateTime() const
 ///
 size_t Replay::getId() const
 {
-    return id_;
+    return getValue<size_t>("id");
 }
 
 ///
@@ -68,7 +68,7 @@ size_t Replay::getId() const
 ///
 size_t Replay::getSize() const
 {
-    return size_;
+    return getValue<size_t>("size");
 }
 
 ///
@@ -77,7 +77,7 @@ size_t Replay::getSize() const
 ///
 size_t Replay::getRespawn() const
 {
-    return respawn_;
+    return getValue<size_t>("respawn");
 }
 
 ///
@@ -86,7 +86,7 @@ size_t Replay::getRespawn() const
 ///
 size_t Replay::getDuration() const
 {
-    return duration_;
+    return getValue<size_t>("duration");
 }
 
 ///
@@ -95,70 +95,70 @@ size_t Replay::getDuration() const
 ///
 size_t Replay::getWinnerTeam() const
 {
-    return winnerTeam_;
+    return getValue<size_t>("winnerTeam");
 }
 
 ///
 /// \brief Replay::getDateTime
 /// \return
 ///
-std::string_view Replay::getDateTime() const
+std::string Replay::getDateTime() const
 {
-    return dateTime_;
+    return getValue<std::string>("dateTime");
 }
 
 ///
 /// \brief Replay::getVehicle
 /// \return
 ///
-std::string_view Replay::getVehicle() const
+std::string Replay::getVehicle() const
 {
-    return vehicle_;
+    return getValue<std::string>("vehicle");
 }
 
 ///
 /// \brief Replay::getMapName
 /// \return
 ///
-std::string_view Replay::getMapName() const
+std::string Replay::getMapName() const
 {
-    return mapName_;
+    return getValue<std::string>("vehicle");
 }
 
 ///
 /// \brief Replay::getUserName
 /// \return
 ///
-std::string_view Replay::getUserName() const
+std::string Replay::getUserName() const
 {
-    return userName_;
+    return getValue<std::string>("userName");
 }
 
 ///
 /// \brief Replay::getTestName
 /// \return
 ///
-std::string_view Replay::getTestName() const
+std::string Replay::getTestName() const
 {
-    return testName_;
+    return getValue<std::string>("testName");
 }
 
 ///
 /// \brief Replay::getReplayName
 /// \return
 ///
-std::string_view Replay::getReplayName() const
+std::string Replay::getReplayName() const
 {
-    return replayName_;
+    return getValue<std::string>("replayName");
 }
 
 ///
 /// \brief Replay::getClientVersionFromXML
 /// \return
 ///
-std::string_view Replay::getClientVersionFromXML() const
+std::string Replay::getClientVersionFromXML() const
 {
-    return clientVersionFromXML_;
+    return getValue<std::string>("clientVersionFromXML");
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -168,148 +168,148 @@ std::string_view Replay::getClientVersionFromXML() const
 /// \brief Replay::setValidity
 /// \param newValidity
 ///
-void Replay::setValidity(bool newValidity)
+bool Replay::setValidity(bool newValidity)
 {
-    validity_ = newValidity;
+    return setCheckValue("validity", newValidity);
 }
 
 ///
 /// \brief Replay::setIsReplay
 /// \param newIsReplay
 ///
-void Replay::setIsReplay(bool newIsReplay)
+bool Replay::setIsReplay(bool newIsReplay)
 {
-    isReplay_ = newIsReplay;
+    return setCheckValue("isReplay", newIsReplay);
 }
 
 ///
 /// \brief Replay::setIsHasMods
 /// \param newHasMods
 ///
-void Replay::setIsHasMods(bool newHasMods)
+bool Replay::setIsHasMods(bool newHasMods)
 {
-    isReplay_ = newHasMods;
+    return setCheckValue("hasMods", newHasMods);
 }
 
 ///
 /// \brief Replay::setUserID
 /// \param newUserID
 ///
-void Replay::setUserID(long long newUserID){
-    userID_ = newUserID;
+bool Replay::setUserID(size_t newUserID){
+    return setCheckValue("userID", newUserID);
 }
 
 ///
 /// \brief Replay::setArenaCreateTime
 /// \param newArenaCreateTime
 ///
-void Replay::setArenaCreateTime(long long newArenaCreateTime){
-    arenaCreateTime_ = newArenaCreateTime;
+bool Replay::setArenaCreateTime(size_t newArenaCreateTime){
+    return setCheckValue("arenaCreateTime", newArenaCreateTime);
 }
 
 ///
 /// \brief Replay::setId
 /// \param newId
 ///
-void Replay::setId(size_t newId)
+bool Replay::setId(size_t newId)
 {
-    id_ = newId;
+    return setCheckValue("id", newId);
 }
 
 ///
 /// \brief Replay::setSize
 /// \param newSize
 ///
-void Replay::setSize(size_t newSize)
+bool Replay::setSize(size_t newSize)
 {
-    size_ = newSize;
+    return setCheckValue("size", newSize);
 }
 
 ///
 /// \brief Replay::setRespawn
 /// \param newRespawn
 ///
-void Replay::setRespawn(size_t newRespawn)
+bool Replay::setRespawn(size_t newRespawn)
 {
-    respawn_ = newRespawn;
+    return setCheckValue("respawn", newRespawn);
 }
 
 ///
 /// \brief Replay::setDuration
 /// \param newDuration
 ///
-void Replay::setDuration(size_t newDuration)
+bool Replay::setDuration(size_t newDuration)
 {
-    duration_ = newDuration;
+    return setCheckValue("duration", newDuration);
 }
 
 ///
 /// \brief Replay::setWinnerTeam
 /// \param newVinnerTeam
 ///
-void Replay::setWinnerTeam(size_t newWinnerTeam)
+bool Replay::setWinnerTeam(size_t newWinnerTeam)
 {
-    winnerTeam_ = newWinnerTeam;
+    return setCheckValue("winnerTeam", newWinnerTeam);
 }
 
 ///
 /// \brief Replay::setDateTime
 /// \param newDateTime
 ///
-void Replay::setDateTime(const std::string &newDateTime)
+bool Replay::setDateTime(const std::string &newDateTime)
 {
-    dateTime_ = newDateTime;
+    return setCheckValue("dateTime", newDateTime);
 }
 
 ///
 /// \brief Replay::setVehicle
 /// \param newVehicle
 ///
-void Replay::setVehicle(const std::string &newVehicle)
+bool Replay::setVehicle(const std::string &newVehicle)
 {
-    vehicle_ = newVehicle;
+    return setCheckValue("vehicle", newVehicle);
 }
 
 ///
 /// \brief Replay::setMapName
 /// \param newMapName
 ///
-void Replay::setMapName(const std::string &newMapName)
+bool Replay::setMapName(const std::string &newMapName)
 {
-    mapName_ = newMapName;
+    return setCheckValue("mapName", newMapName);
 }
 
 ///
 /// \brief Replay::setUserName
 /// \param newUserName
 ///
-void Replay::setUserName(const std::string &newUserName)
+bool Replay::setUserName(const std::string &newUserName)
 {
-    userName_ = newUserName;
+    return setCheckValue("userName", newUserName);
 }
 
 ///
 /// \brief Replay::setTestName
 /// \param newTestName
 ///
-void Replay::setTestName(const std::string &newTestName)
+bool Replay::setTestName(const std::string &newTestName)
 {
-    testName_ = newTestName;
+    return setCheckValue("testName", newTestName);
 }
 
 ///
 /// \brief Replay::setReplayName
 /// \param newReplayName
 ///
-void Replay::setReplayName(const std::string &newReplayName)
+bool Replay::setReplayName(const std::string &newReplayName)
 {
-    replayName_ = newReplayName;
+    return setCheckValue("replayName", newReplayName);
 }
 
 
-void Replay::setClientVersionFromXML(const std::string &newClientVersionFromXML)
+bool Replay::setClientVersionFromXML(const std::string &newClientVersionFromXML)
 {
-    clientVersionFromXML_ = newClientVersionFromXML;
+    return setCheckValue("clientVersionFromXML", newClientVersionFromXML);
 }
 
 
@@ -384,6 +384,8 @@ void Replay::ParseCommonBlock(QJsonObject &&data, Replay &replay)
         if(it.key() == "winnerTeam")        replay.setWinnerTeam(std::move(it.value().toInteger()));
     }
 }
+
+
 
 
 }

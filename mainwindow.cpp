@@ -163,6 +163,9 @@ const std::pair<std::map<std::string, int>, bool> MainWindow::setHeaderInTable(Q
 void MainWindow::setCurrentItem(QTableWidget &table, const std::vector<WSTR::Replay> &vec, const std::map<std::string, int>& mp)
 {
 
+
+
+
             ///////////////////////////////////////////////////////////
             /// to do
             /// //////////////////////////////////////////////////////

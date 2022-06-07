@@ -36,27 +36,28 @@ class Settings{
             { "header_1", "id" }
             , { "header_2", "size" }
             , { "header_3", "validity" }
-            , { "header_4", "hasmods" }
+            , { "header_4", "hasMods" }
             , { "header_5", "respawn" }
-            , { "header_6", "mapname" }
-            , { "header_7", "testname" }
+            , { "header_6", "mapName" }
+            , { "header_7", "testName" }
         };
-
-        static constexpr std::array<std::string_view, 17> headerArray_{
+        static constexpr std::array<std::string_view, 16> headerArray_{
             "id"
             , "size"
             , "validity"
-            , "hasmods"
+            , "hasMods"
             , "respawn"
             , "duration"
-            , "winnerteam"
-            , "datetime"
+            , "winnerTeam"
+            , "dateTime"
             , "vehicle"
-            , "mapname"
-            , "username"
-            , "testname"
-            , "replayname"
-            , "clientversion"
+            , "mapName"
+            , "userName"
+            , "testName"
+            , "replayName"
+            , "clientVersionFromXML"
+            , "userID"
+            , "arenaCreateTime"
         };
 
 
@@ -116,14 +117,15 @@ private:            // PRIVATE VARIABLES
 
 private:            // PRIVATE STATIC VARIABLES AND FUNCTIONS
 
-    ///
-    ///
-    ///
-    static constexpr std::string_view settingFileName_{ "./settings.dat" };
 
     ///
     ///
     static constexpr std::string_view versionApplication_{ "6.0.0.0" };
+
+    ///
+    ///
+    ///
+    static constexpr std::string_view settingFileName_{ "./settings.dat" };
 
     ///
     /// \brief checkDirExists

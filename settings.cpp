@@ -193,7 +193,7 @@ bool Settings::checkDirExists(std::string_view pathDir)
 {
     QDir dir{ pathDir.data() };
     return dir.exists();
-}
+    }
 
 ///
 /// \brief Settings::PathFromQComboBoxToPathsBufer
