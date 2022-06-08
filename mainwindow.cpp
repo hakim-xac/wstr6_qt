@@ -6,6 +6,7 @@
 #include <iterator>
 #include <algorithm>
 #include <string>
+#include <map>
 
 ///
 /// \brief MainWindow::MainWindow
@@ -117,71 +118,10 @@ void MainWindow::initPathsView()
     table.setRowCount(static_cast<int>(vec.size()));
     table.setColumnCount(settings.getCountHeaderList());
 
-
     auto&& [headerMap, isHeaderMap] = setHeaderInTable(table);
     if(!isHeaderMap) return false;
     setCurrentItem(table, vec, headerMap);
     return true;
-}
-
-///
-/// \brief MainWindow::setHeaderInTable
-/// \param table
-/// \return
-///
-const std::pair<std::map<std::string, int>, bool> MainWindow::setHeaderInTable(QTableWidget &table)
-{
-    std::map<std::string, int> mp;
-    for(auto i{ 1ull }, ie{ settings.getCountHeaderList() }; i <= ie; ++i){
-        std::string headerName{ "header_" + std::to_string(i) };
-        auto&& [value, isValue] = settings.getValue<std::string>(headerName, WSTR::SelectBase::Headers);
-
-        if(isValue){
-            QTableWidgetItem* elem{ new QTableWidgetItem ( QString::fromStdString(value) ) };
-            elem->setFont( {"Tahoma", 14, QFont::StyleNormal } );
-            elem->setForeground(Qt::darkGray);
-            elem->setTextAlignment(Qt::AlignHCenter | Qt::AlignTop);
-
-            table.setHorizontalHeaderItem(i-1, elem );
-
-            mp.insert( {value, static_cast<int>(i) } );
-        }
-        else{
-            table.setHorizontalHeaderItem(i-1, new QTableWidgetItem(QString(i, '-')));
-            return { {}, false};
-        }
-    }
-    return { mp, true };
-}
-
-///
-/// \brief MainWindow::setCurrentItem
-/// \param table
-/// \param vec
-/// \param mp
-///
-void MainWindow::setCurrentItem(QTableWidget &table, const std::vector<WSTR::Replay> &vec, const std::map<std::string, int>& mp)
-{
-
-
-
-
-            ///////////////////////////////////////////////////////////
-            /// to do
-            /// //////////////////////////////////////////////////////
-    for(int i{}, ie{ table.rowCount() }; i < ie; ++i){
-        for(int j{}, je{ table.columnCount() }; j < je; ++j){
-            auto headerItem{ table.horizontalHeaderItem(j) };
-            int index{ mp.at(headerItem->text().toStdString()) };
-
-             // НУЖНО ИЗМЕНИТЬ АРХИТЕКТУРУ КЛАССА rEPLAY. ЗАПИХАТЬ ВСЕ ПОЛЯ ПО МАПАМ И ГЕТТЕРЕЫ И СЕТТЕРЫ ОБРАЩАЛИСЬ К ЭЛЕМЕНТАМ МАП.
-            // ЭТО НУЖНО, ЧТОБЫ ЗНАЯ TITLE ТЕКУЩЕЙ КОЛОНКИ МОЖНО БЫЛО ЗА O(1) НАЙТИ НЕОБХОДИМЫЙ ГЕТТЕР И ЗАПИСАТЬ В ТАБЛИЦУ
-
-
-            QTableWidgetItem* elem{ new QTableWidgetItem("y") };
-            table.setItem(i, j, elem);
-        }
-    }
 }
 
 ///
@@ -280,16 +220,19 @@ void MainWindow::on_runScan_clicked()
 
     std::vector<WSTR::Replay> vecReplays(listFiles.size());
 
+    if(vecReplays.size() == 0){
+        toStatusBar(("Файлы \""+filters+"\" в данной папке отсутствуют!").toStdString());
+        return;
+    }
+
     {
         size_t i{};
         std::for_each(std::begin(vecReplays), std::end(vecReplays), [&listFiles, &i](auto&& elem){
 
             elem = WSTR::Replay(listFiles[i].absoluteFilePath().toStdString(), i);
-            std::cout << "i: " << i << std::endl;
             ++i;
         });
     }
-
     replaysToTable(*ui->tableWidget, vecReplays);
 
 

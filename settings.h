@@ -217,7 +217,7 @@ public:             // PUBLIC FUNCTIONS
     /// \return
     ///
     template <typename Type = std::string>
-    std::pair<Type, bool>
+    std::pair<std::decay_t<Type>, bool>
     getValue(const std::string& key, WSTR::SelectBase sb = WSTR::SelectBase::General);
 
     ///
@@ -285,24 +285,26 @@ public:             // PUBLIC FUNCTIONS
 /// \return
 ///
 template <typename Type>
-std::pair<Type, bool> Settings
+std::pair<std::decay_t<Type>, bool> Settings
 ::getValue(const std::string& key, WSTR::SelectBase sb){
+    using type = std::decay_t<Type>;
+
     auto base{ selectBase(sb) };
-    if(!base) return { Type(), false };
+    if(!base) return { type(), false };
     try{
-        if constexpr(std::is_same_v<Type, std::string>){
+        if constexpr(std::is_same_v<type, std::string>){
             return { base->at(key.data()), true };
         }
         else {
             std::stringstream ss;
             ss << base->at(key.data());
-            Type tmp{};
+            type tmp{};
             if(ss >> tmp) return { tmp, true };
-            return { Type() , false };
+            return { type() , false };
         }
     }
     catch(std::out_of_range ex){
-        return { Type(), false };
+        return { type(), false };
     }
 
 }

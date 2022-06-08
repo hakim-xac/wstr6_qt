@@ -31,6 +31,7 @@ set(PROJECT_SOURCES
         logs.h
         enums.h
         replay.h
+        concepts.h
         ${TS_FILES}
 )
 

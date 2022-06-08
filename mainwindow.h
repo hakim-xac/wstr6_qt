@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include "./ui_mainwindow.h"
+#include "concepts.h"
 #include "settings.h"
 #include "replay.h"
 #include <sstream>
@@ -77,7 +78,8 @@ private:
     /// \param table
     /// \return
     ///
-    const std::pair<std::map<std::string, int>, bool> setHeaderInTable(QTableWidget& table);
+    template <typename Type = int>
+    const std::pair< std::map<std::string, size_t>, bool> setHeaderInTable(QTableWidget& table);
 
     ///
     /// \brief setCurrentItem
@@ -85,7 +87,8 @@ private:
     /// \param vec
     /// \param mp
     ///
-    void setCurrentItem(QTableWidget& table, const std::vector<WSTR::Replay> &vec, const std::map<std::string, int>& mp);
+    template <typename Type/*, typename std::enable_if_t<WSTR::IsMap<Type>::type>*/>
+    void setCurrentItem(QTableWidget& table, const std::vector<WSTR::Replay> &vec, const Type& mp);
 
 private:
     Ui::MainWindow *ui;
@@ -156,6 +159,65 @@ QFileInfoList MainWindow
     dir.setSorting(QDir::Size | QDir::Reversed);
     return dir.entryInfoList();
 
+}
+
+///
+/// \brief MainWindow::setCurrentItem
+/// \param table
+/// \param vec
+/// \param mp
+///
+template <typename Type/*, typename std::enable_if_t<WSTR::IsMap<Type>::type>*/>
+void MainWindow::setCurrentItem(QTableWidget &table, const std::vector<WSTR::Replay> &vec, const Type& mp)
+{
+
+    for(int i{}, ie{ table.rowCount() }; i < ie; ++i){
+        for(int j{}, je{ table.columnCount() }; j < je; ++j){
+            auto headerItem{ table.horizontalHeaderItem(j) };
+            auto elemString{ headerItem->text().toStdString() };
+
+            std::string val{"-"};
+            if (vec[i].checkValue<bool>(elemString)){
+                val = std::to_string(vec[i].getValue<bool>(elemString));
+            }
+            else if (vec[i].checkValue<std::string>(elemString)){
+                val = vec[i].getValue<std::string>(elemString);
+            }
+            else if (vec[i].checkValue<size_t>(elemString)){
+                val = std::to_string(vec[i].getValue<size_t>(elemString));
+            }
+            QTableWidgetItem* elem{ new QTableWidgetItem(QString::fromStdString(val)) };
+            table.setItem(i, j, elem);
+        }
+    }
+}
+
+
+template <typename Type>
+const std::pair< std::map<std::string, size_t>, bool> MainWindow::setHeaderInTable(QTableWidget &table)
+{
+    std::map<std::string, size_t> mp;
+    for(size_t i{ 1 }, ie{ settings.getCountHeaderList() }; i <= ie; ++i){
+        std::string headerName{ "header_" + std::to_string(i) };
+        auto&& [value, isValue] = settings.getValue<std::string>(headerName, WSTR::SelectBase::Headers);
+
+        if(isValue){
+            QTableWidgetItem* elem{ new QTableWidgetItem ( QString::fromStdString(value) ) };
+            elem->setFont( {"Tahoma", 14, QFont::StyleNormal } );
+            elem->setForeground(Qt::darkGray);
+            elem->setTextAlignment(Qt::AlignHCenter | Qt::AlignTop);
+
+            table.setHorizontalHeaderItem(i-1, elem );
+
+            mp.insert( {value, static_cast<size_t>(i) } );
+        }
+        else{
+            table.setHorizontalHeaderItem(i-1, new QTableWidgetItem(QString(i, '-')));
+
+            return { {}, false };
+        }
+    }
+    return { mp, true };
 }
 
 

@@ -376,7 +376,6 @@ constexpr std::pair<std::decay_t<Type>, bool> Replay::isGetValue(std::string_vie
 template <typename Type>
 void Replay::setValue(const std::string& key, Type&& newValue){
 
-    using namespace std::literals;
     using type = std::decay_t<Type>;
 
     constexpr bool typeIsBool   { std::is_same_v<type, bool>        };
