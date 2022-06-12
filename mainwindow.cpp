@@ -23,6 +23,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     variableInitialization();
 
+    ui->tableWidget->verticalHeader()->hide();
+    ui->tableWidget->horizontalHeader()->show();
+
 }
 
 ///
@@ -105,6 +108,18 @@ void MainWindow::initPathsView()
 }
 
 ///
+/// \brief MainWindow::clearTable
+/// \param table
+///
+void MainWindow::clearTable(QTableWidget *table) const
+{
+    if(!table) return;
+    table->setColumnCount(0);
+    table->setRowCount(0);
+    table->clearContents();
+}
+
+///
 /// \brief MainWindow::replaysToTable
 /// \param table
 /// \param vec
@@ -153,6 +168,8 @@ void MainWindow::on_pushButton_clicked()
 
     settings.PathFromQComboBoxToPathsBufer(*ui->paths);
     settings.save();
+
+    clearTable(ui->tableWidget);
 }
 
 
@@ -166,19 +183,24 @@ void MainWindow::on_paths_activated(int index)
 {
     settings.setValue("currentPathIndex", std::to_string(index));
     settings.save();
+    clearTable(ui->tableWidget);
 }
 
 
 
 void MainWindow::on_checkBox_clicked()
 {
+#if 0
     //
     auto listFiles { scanDirectory(ui->paths->itemText(ui->paths->currentIndex())) };
 
     for(int i{1}; i <= 10; ++i){
         for(auto&& elem: listFiles){
+
             auto from{ elem.absoluteFilePath().toStdString() };
+
             std::ifstream fin{ from, std::ios::binary };
+
             if(!fin.is_open()){
                 std::cout << "can not open file: " << from << std::endl;
                 continue;
@@ -202,6 +224,7 @@ void MainWindow::on_checkBox_clicked()
 
         }
     }
+#endif
 
 }
 
@@ -210,6 +233,7 @@ void MainWindow::on_checkBox_clicked()
 ///
 void MainWindow::on_runScan_clicked()
 {
+    clearTable(ui->tableWidget);
     QString filters{ "*.wotreplay" };
     auto listFiles { scanDirectory(ui->paths->itemText(ui->paths->currentIndex()), filters) };
 
@@ -225,6 +249,7 @@ void MainWindow::on_runScan_clicked()
         return;
     }
 
+    ui->tableWidget->setEnabled(false);
     {
         size_t i{};
         std::for_each(std::begin(vecReplays), std::end(vecReplays), [&listFiles, &i](auto&& elem){
@@ -235,6 +260,7 @@ void MainWindow::on_runScan_clicked()
     }
     replaysToTable(*ui->tableWidget, vecReplays);
 
+    ui->tableWidget->setEnabled(true);
 
 
 }

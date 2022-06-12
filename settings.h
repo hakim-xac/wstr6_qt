@@ -39,9 +39,14 @@ class Settings{
             , { "header_4", "hasMods" }
             , { "header_5", "respawn" }
             , { "header_6", "mapName" }
-            , { "header_7", "testName" }
+            , { "header_7", "mapDisplayName" }
+            , { "header_8", "playerName" }
+            , { "header_9", "playerVehicle" }
+            , { "header_10", "clientVersionFromXml" }
+            , { "header_11", "playerID" }
+            , { "header_12", "battleType" }
         };
-        static constexpr std::array<std::string_view, 16> headerArray_{
+        static constexpr std::array<std::string_view, 17> headerArray_{
             "id"
             , "size"
             , "validity"
@@ -53,11 +58,12 @@ class Settings{
             , "vehicle"
             , "mapName"
             , "userName"
-            , "testName"
+            , "mapDisplayNameTestName"
             , "replayName"
-            , "clientVersionFromXML"
-            , "userID"
+            , "clientVersionFromXml"
+            , "playerID"
             , "arenaCreateTime"
+            , "battleType"
         };
 
 

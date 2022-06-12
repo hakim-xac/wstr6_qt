@@ -56,6 +56,8 @@ private:
     ///
     void initPathsView();
 
+    void clearTable(QTableWidget* table) const;
+
     ///
     /// \brief scanDirectory
     /// \param pathDir

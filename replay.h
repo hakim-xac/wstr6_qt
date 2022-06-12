@@ -27,19 +27,21 @@ private:            // PRIVATE VARIABLES
         { "dateTime", defaultStringEmpty_ }
         , { "vehicle", defaultStringEmpty_ }
         , { "mapName", defaultStringEmpty_ }
-        , { "userName", defaultStringEmpty_ }
-        , { "testName", defaultStringEmpty_ }
+        , { "mapDisplayName", defaultStringEmpty_ }
         , { "replayName", defaultStringEmpty_ }
-        , { "clientVersionFromXML", defaultStringEmpty_ }
+        , { "clientVersionFromXml", defaultStringEmpty_ }
+        , { "playerName", defaultStringEmpty_ }
+        , { "playerVehicle", defaultStringEmpty_ }
     };
     std::map<std::string, size_t> dataSize_t_{
-        { "userID", defaultSize_tEmpty_ }
+        { "playerID", defaultSize_tEmpty_ }
         , { "arenaCreateTime", defaultSize_tEmpty_ }
         , { "id", defaultSize_tEmpty_ }
         , { "size", defaultSize_tEmpty_ }
         , { "respawn", defaultSize_tEmpty_ }
         , { "duration", defaultSize_tEmpty_ }
         , { "winnerTeam", defaultSize_tEmpty_ }
+        , { "battleType", defaultSize_tEmpty_ }
     };
     std::map<std::string, bool> dataBool_{
         { "validity", defaultBoolEmpty_ }
@@ -53,40 +55,22 @@ public:             // PUBLIC FUNCTIONS
     template <typename TypeFileName>
     Replay(TypeFileName&& filename, size_t id);
 
-    bool getIsValidity() const;
-    bool getIsReplay() const;
-    bool getIsHasMods() const;
-    size_t getUserID() const;
-    size_t getArenaCreateTime() const;
-    size_t getId() const;
-    size_t getSize() const;
-    size_t getRespawn() const;
-    size_t getDuration() const;
-    size_t getWinnerTeam() const;
-    std::string getDateTime() const;
-    std::string getVehicle() const;
-    std::string getMapName() const;
-    std::string getUserName() const;
-    std::string getTestName() const;
-    std::string getReplayName() const;
-    std::string getClientVersionFromXML() const;
-
-
     bool setValidity(bool newValidity);
     bool setIsReplay(bool newIsReplay);
     bool setIsHasMods(bool newHasMods);
-    bool setUserID(size_t newUserID);
+    bool setplayerID(size_t newplayerID);
     bool setArenaCreateTime(size_t newArenaCreateTime);
     bool setId(size_t newId);
     bool setSize(size_t newSize);
     bool setRespawn(size_t newRespawn);
     bool setDuration(size_t newDuration);
     bool setWinnerTeam(size_t newWinnerTeam);
+    bool setBattleType(size_t newBattleType);
     bool setDateTime(const std::string &newDateTime);
     bool setVehicle(const std::string &newVehicle);
     bool setMapName(const std::string &newMapName);
-    bool setUserName(const std::string &newUserName);
-    bool setTestName(const std::string &newTestName);
+    bool setPlayerName(const std::string &newPlayerName);
+    bool setMapDisplayName(const std::string &newMapDisplayName);
     bool setReplayName(const std::string &newReplayName);
     bool setClientVersionFromXML(const std::string &newClientVersionFromXML);
 
@@ -298,17 +282,18 @@ constexpr std::string_view Replay
 template <typename Type>
 constexpr std::decay_t<Type> Replay
 ::get(std::istream& stream, size_t size){
+
+    std::decay_t<Type> value{};
+
     if constexpr(std::is_same_v<std::string, std::decay_t<Type>>){
-        std::decay_t<Type> value{};
         value.resize(size);
         stream.read(reinterpret_cast<char*>(&value[0]), size);
-        return value;
     }
     else{
-        std::decay_t<Type> value{};
         stream.read(reinterpret_cast<char*>(&value), sizeof value);
-        return value;
     }
+
+    return value;
 }
 
 ///
