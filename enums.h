@@ -19,6 +19,24 @@ enum class SelectBase{
     , Headers
 };
 
+enum class BattleType{
+    Random
+    , Workout
+    , CompanyBattle
+    , CombatTraining
+    , TeamBattle
+    , HistoryBattles
+    , FanMode
+    , Sortie
+    , BattleForTheFortifiedArea
+    , RankedBattle
+    , PitchedBattle
+    , FrontLine
+    , Tournament
+    , GK
+    , Unknown
+};
+
 
 }
 

@@ -17,7 +17,6 @@ namespace WSTR {
 Settings::Settings()
     : default_()
     , countOfPaths_()
-    , base_()
     , bd_(default_.bd_)
     , pathsList_()
     , headerList_(default_.header_) {}
@@ -57,7 +56,7 @@ bool Settings::saveToFile(std::stringstream& buffer) const
 std::pair<std::pair<std::string, std::string>, bool> Settings::parseLine(const std::string& str)
 {
     size_t pos{ str.find(':') };
-    if(pos == std::string::npos || (pos+1) == std::string::npos) return {{"", "" }, false};
+    if(pos == std::string::npos || (pos+1) == std::string::npos) return {{ "", "" }, false};
     return { std::make_pair(str.substr(0, pos), str.substr(pos+1)) , true };
 }
 
@@ -146,7 +145,7 @@ bool Settings::parse(const std::vector<std::string> &configBuffer)
 /// \param sb
 /// \return
 ///
-std::map<std::string, std::string> *Settings::selectBase(SelectBase sb)
+std::map<const std::string, std::string> *Settings::selectBase(SelectBase sb)
 {
     switch(sb){
     case WSTR::SelectBase::General:

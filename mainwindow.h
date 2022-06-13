@@ -21,6 +21,7 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+
 private slots:
     void on_runScan_clicked();
 
@@ -29,6 +30,8 @@ private slots:
     void on_paths_activated(int index);
 
     void on_checkBox_clicked();
+
+
 
 private:
     ///
@@ -91,6 +94,20 @@ private:
     ///
     template <typename Type/*, typename std::enable_if_t<WSTR::IsMap<Type>::type>*/>
     void setCurrentItem(QTableWidget& table, const std::vector<WSTR::Replay> &vec, const Type& mp);
+
+    ///
+    /// \brief toThreadStatusBar
+    /// \param str
+    /// \param label
+    ///
+    void toThreadStatusBar(QString&& str, QLabel* const label, int waitSec = 1);
+
+    ///
+    /// \brief showStatusBar
+    /// \param str
+    /// \param label
+    ///
+    static void showStatusBar(const QString& str, QLabel* const label, int waitSec);
 
 private:
     Ui::MainWindow *ui;
@@ -172,8 +189,12 @@ QFileInfoList MainWindow
 template <typename Type/*, typename std::enable_if_t<WSTR::IsMap<Type>::type>*/>
 void MainWindow::setCurrentItem(QTableWidget &table, const std::vector<WSTR::Replay> &vec, const Type& mp)
 {
+    using namespace std::literals;
 
     for(int i{}, ie{ table.rowCount() }; i < ie; ++i){
+
+        auto isValidity{ vec[i].getValue<bool>("validity"s) };
+
         for(int j{}, je{ table.columnCount() }; j < je; ++j){
             auto headerItem{ table.horizontalHeaderItem(j) };
             auto elemString{ headerItem->text().toStdString() };
@@ -188,7 +209,16 @@ void MainWindow::setCurrentItem(QTableWidget &table, const std::vector<WSTR::Rep
             else if (vec[i].checkValue<size_t>(elemString)){
                 val = std::to_string(vec[i].getValue<size_t>(elemString));
             }
-            QTableWidgetItem* elem{ new QTableWidgetItem(QString::fromStdString(val)) };
+
+            QTableWidgetItem* elem{ new QTableWidgetItem() };
+
+
+            if(isValidity)  elem->setForeground(QColor(34, 34, 34));
+            else            elem->setBackground(QColor(160, 0, 0));
+
+            elem->setText(QString::fromStdString(val));
+            elem->setFont( {"Tahoma", 12, QFont::StyleNormal } );
+            elem->setTextAlignment(Qt::AlignCenter);
             table.setItem(i, j, elem);
         }
     }

@@ -1,11 +1,10 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
-#include "./logs.h"
+#include "logs.h"
 #include <string_view>
 #include <string>
 #include <sstream>
-#include <queue>
 #include <map>
 #include <QDir>
 #include <QCoreApplication>
@@ -27,12 +26,16 @@ class Settings{
         ///
         ///
         ///
-        const std::map<std::string, std::string> bd_{
+        static inline const std::map<const std::string, std::string> bd_{
             { "countOfPaths", "0" }
             , { "currentPathIndex", "0" }
+            , { "waitUpdateStatusBar_s", "1" }
         };
 
-        const std::map<std::string, std::string> header_{
+        ///
+        ///
+        ///
+        static inline const std::map<const std::string, std::string> header_{
             { "header_1", "id" }
             , { "header_2", "size" }
             , { "header_3", "validity" }
@@ -46,6 +49,10 @@ class Settings{
             , { "header_11", "playerID" }
             , { "header_12", "battleType" }
         };
+
+        ///
+        ///
+        ///
         static constexpr std::array<std::string_view, 17> headerArray_{
             "id"
             , "size"
@@ -65,6 +72,7 @@ class Settings{
             , "arenaCreateTime"
             , "battleType"
         };
+
 
 
     };
@@ -100,25 +108,20 @@ private:            // PRIVATE VARIABLES
     static constexpr size_t maximumInSize_t_{ 100 };
 
     ///
-    /// \brief base_
     ///
     ///
-    std::queue<std::string> base_;
-
-    ///
-    ///
-    ///
-    std::map<std::string, std::string> bd_;
+    std::map<const std::string, std::string> bd_;
 
     ///
     /// \brief pathsList_
     ///
-    std::map<std::string, std::string> pathsList_;
+    std::map<const std::string, std::string> pathsList_;
 
     ///
     /// \brief headerList_
     ///
-    std::map<std::string, std::string> headerList_;
+    std::map<const std::string, std::string> headerList_;
+
 
 
 private:            // PRIVATE STATIC VARIABLES AND FUNCTIONS
@@ -177,7 +180,7 @@ private:            // PRIVATE FUNCTIONS
     /// \param sb
     /// \return
     ///
-    std::map<std::string, std::string>* selectBase(WSTR::SelectBase sb = WSTR::SelectBase::General);
+    std::map<const std::string, std::string>* selectBase(WSTR::SelectBase sb = WSTR::SelectBase::General);
 
     ///
     /// \brief checkHeaderItem
@@ -196,7 +199,12 @@ private:            // PRIVATE FUNCTIONS
 
 
 public:             // PUBLIC VARIABLES
+
+    ///
+    ///
+    ///
     Logs logs{ std::cout };
+
 
 public:             // PUBLIC FUNCTIONS
 
@@ -325,7 +333,7 @@ std::pair<std::decay_t<Type>, bool> Settings
 template <typename KeyType, typename ValueType>
 bool Settings
 ::setValue(KeyType&& key, ValueType&& value, WSTR::SelectBase sb ){
-    std::map<std::string, std::string>* base{ selectBase(sb) };
+    std::map<const std::string, std::string>* base{ selectBase(sb) };
     if(!base) return false;
 
     auto&& [_, isKey] = getValue(key, sb);

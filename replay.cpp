@@ -3,6 +3,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <algorithm>
 
 namespace WSTR{
 
@@ -10,10 +11,24 @@ namespace WSTR{
 ///////////////////////////////////////////////////////////////////////////////////
 
 
+
 ///
 /// \brief Replay::setValidity
 /// \param newValidity
 ///
+
+Replay::Replay()
+{
+    ++count_;
+}
+
+Replay::~Replay()
+{
+    --count_;
+}
+
+
+
 bool Replay::setValidity(bool newValidity)
 {
     return setCheckValue("validity", newValidity);
@@ -100,7 +115,13 @@ bool Replay::setWinnerTeam(size_t newWinnerTeam)
 
 bool Replay::setBattleType(size_t newBattleType)
 {
-    return setCheckValue("battleType", newBattleType);
+    WSTR::BattleType bt{ getBattleType(std::to_string(newBattleType)) };
+
+    auto&& [value, isValue] = isGetValue<std::string>(bt);
+    if(isValue) {
+        return setCheckValue("battleType", value);
+    }
+    return false;
 }
 
 ///
@@ -161,6 +182,51 @@ bool Replay::setReplayName(const std::string &newReplayName)
 bool Replay::setClientVersionFromXML(const std::string &newClientVersionFromXML)
 {
     return setCheckValue("clientVersionFromXml", newClientVersionFromXML);
+}
+
+
+BattleType Replay::getBattleType(const std::string& index)
+{
+    auto&& [value, isValue] = Settings::toType<size_t>(index);
+    if(!isValue) return WSTR::BattleType::Unknown;
+    switch(value){
+    case 1:
+    return WSTR::BattleType::Random;
+    case 2:
+    return WSTR::BattleType::Workout;
+    case 7:
+    return WSTR::BattleType::TeamBattle;
+    case 9:
+    return WSTR::BattleType::FanMode;
+    case 13:
+    return WSTR::BattleType::GK;
+    case 22:
+    return WSTR::BattleType::RankedBattle;
+    case 24:
+    return WSTR::BattleType::PitchedBattle;
+    case 27:
+    return WSTR::BattleType::FrontLine;
+    case 29:
+    return WSTR::BattleType::Tournament;
+    default:
+    return WSTR::BattleType::Unknown;
+
+    }
+}
+
+size_t Replay::getCount()
+{
+    return count_;
+}
+
+size_t Replay::getCountValidity()
+{
+    return countValidity_;
+}
+
+void Replay::clearCountValidity()
+{
+    countValidity_ = 0;
 }
 
 

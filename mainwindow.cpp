@@ -7,6 +7,9 @@
 #include <algorithm>
 #include <string>
 #include <map>
+#include <QThread>
+#include <thread>
+#include <chrono>
 
 ///
 /// \brief MainWindow::MainWindow
@@ -25,6 +28,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->tableWidget->verticalHeader()->hide();
     ui->tableWidget->horizontalHeader()->show();
+    ui->tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers); // prohibition of editing
+    ui->tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
 
 }
 
@@ -46,6 +51,7 @@ void MainWindow::variableInitialization()
 
     initPathsView();
 
+    toThreadStatusBar("ХАЙ!", ui->statusBar, 5);
 
     settings.logs.pushAndFlash("end MainWindow::variableInitialization()", WSTR::AppType::Debug);
 }
@@ -89,9 +95,13 @@ void MainWindow::initPathsView()
             if(isCurrentPathIndex){
 
             auto [currentIndex, isCurrentIndex] = settings.toType<int>(currentPathIndex_s);
+            ui->paths->setCurrentIndex(0);
 
-            if(isCurrentIndex) ui->paths->setCurrentIndex(currentIndex);
-                settings.save();
+            if(isCurrentIndex && WSTR::Settings::checkIsRange(0, static_cast<int>(paths.size()) - 1, currentIndex)) {
+                ui->paths->setCurrentIndex(currentIndex);
+            }
+
+            settings.save();
             }
             return;
         }
@@ -114,6 +124,8 @@ void MainWindow::initPathsView()
 void MainWindow::clearTable(QTableWidget *table) const
 {
     if(!table) return;
+    ui->allCount->setText("0");
+    ui->allValidity->setText("0");
     table->setColumnCount(0);
     table->setRowCount(0);
     table->clearContents();
@@ -135,8 +147,55 @@ void MainWindow::clearTable(QTableWidget *table) const
 
     auto&& [headerMap, isHeaderMap] = setHeaderInTable(table);
     if(!isHeaderMap) return false;
+
     setCurrentItem(table, vec, headerMap);
+
+    ui->allCount->setText(QString::number(WSTR::Replay::getCount()));
+    ui->allValidity->setText(QString::number(WSTR::Replay::getCountValidity()));
     return true;
+}
+
+///
+/// \brief MainWindow::toThreadStatusBar
+/// \param str
+/// \param label
+///
+void MainWindow::toThreadStatusBar(QString&& str, QLabel* const label, int waitSec)
+{
+        if(!label) return;
+
+        using time = std::chrono::high_resolution_clock;
+        using ms = std::chrono::milliseconds;
+
+        static auto tm{ time::now() };
+        static bool isRun{};
+        auto now{ time::now() };
+
+        auto&& [waitUpdateStatusBar_s, isWait] = settings.getValue<size_t>("waitUpdateStatusBar_s");
+        if(!isWait) waitUpdateStatusBar_s = 1;
+        if((std::chrono::duration_cast<ms>(now - tm)).count() < waitUpdateStatusBar_s * 1000 && isRun) return;
+
+        tm = now;
+        if(waitSec <= 0) waitSec = 1;
+
+        std::thread thread(showStatusBar, str, label, waitSec);
+        thread.detach();
+
+        isRun = true;
+
+}
+
+///
+/// \brief MainWindow::showStatusBar
+/// \param str
+/// \param label
+///
+void MainWindow::showStatusBar(const QString &str, QLabel* const label, int waitSec)
+{
+    if(!label) return;
+    label->setText(str);
+    QThread::sleep(waitSec);
+    label->setText(QString());
 }
 
 ///
@@ -170,6 +229,8 @@ void MainWindow::on_pushButton_clicked()
     settings.save();
 
     clearTable(ui->tableWidget);
+
+    toThreadStatusBar("Каталог успешно выбран!", ui->statusBar);
 }
 
 
@@ -238,28 +299,26 @@ void MainWindow::on_runScan_clicked()
     auto listFiles { scanDirectory(ui->paths->itemText(ui->paths->currentIndex()), filters) };
 
     if(listFiles.size() == 0){
-        toStatusBar(("Файлы \""+filters+"\" в данной папке отсутствуют!").toStdString());
+        toThreadStatusBar(QString("Файлы \""+filters+"\" в данной папке отсутствуют!"), ui->statusBar);
         return;
     }
 
-    std::vector<WSTR::Replay> vecReplays(listFiles.size());
+    //*  BE SURE TO CALL !!!  *///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    WSTR::Replay::clearCountValidity(); // if not called, then the result of "valid replays" is incorrect.
 
-    if(vecReplays.size() == 0){
-        toStatusBar(("Файлы \""+filters+"\" в данной папке отсутствуют!").toStdString());
-        return;
-    }
+
+    std::vector<WSTR::Replay> vecReplays;
+    vecReplays.reserve(listFiles.size());
 
     ui->tableWidget->setEnabled(false);
     {
-        size_t i{};
-        std::for_each(std::begin(vecReplays), std::end(vecReplays), [&listFiles, &i](auto&& elem){
-
-            elem = WSTR::Replay(listFiles[i].absoluteFilePath().toStdString(), i);
-            ++i;
-        });
+        for(size_t i{}, ie{ static_cast<size_t>(listFiles.size()) }; i < ie; ++i){
+            vecReplays.emplace(vecReplays.end(), listFiles[i].absoluteFilePath().toStdString(), i);
+        };
     }
-    replaysToTable(*ui->tableWidget, vecReplays);
 
+    replaysToTable(*ui->tableWidget, vecReplays);
+    toThreadStatusBar("Обновлено!", ui->statusBar);
     ui->tableWidget->setEnabled(true);
 
 

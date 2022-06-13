@@ -2,12 +2,15 @@
 #define REPLAY_H
 
 #include <iostream>
+#include "settings.h"
 #include <string>
 #include <vector>
+#include <algorithm>
 #include <fstream>
 #include <QString>
 #include <cassert>
 #include <QJsonObject>
+#include "enums.h"
 
 namespace WSTR {
 class Replay
@@ -16,41 +19,87 @@ class Replay
 private:            // PRIVATE VARIABLES
 
 
+    static inline const std::string defaultStringEmpty_ { "-" };
+    static constexpr size_t defaultSize_tEmpty_         { 0 };
+    static constexpr bool defaultBoolEmpty_             { false };
+    static inline size_t count_                         {};
+    static inline size_t countValidity_                 {};
+
+    ///
+    ///
+    ///
+    static inline std::map<WSTR::BattleType, std::string> battleList_{
+        { WSTR::BattleType::BattleForTheFortifiedArea   , "Битва за укреп район"    }
+        , { WSTR::BattleType::CombatTraining            , "Боевое обучение"         }
+        , { WSTR::BattleType::CompanyBattle             , "Ротный бой"              }
+        , { WSTR::BattleType::FanMode                   , "Фан режим"               }
+        , { WSTR::BattleType::HistoryBattles            , "Исторические бои"        }
+        , { WSTR::BattleType::Random                    , "Случайный бой"           }
+        , { WSTR::BattleType::Sortie                    , "Вылазка"                 }
+        , { WSTR::BattleType::TeamBattle                , "Командный бой"           }
+        , { WSTR::BattleType::Unknown                   , "Неизвестный режим"       }
+        , { WSTR::BattleType::Workout                   , "Тренировочный бой"       }
+        , { WSTR::BattleType::RankedBattle              , "Ранговый бой"            }
+        , { WSTR::BattleType::PitchedBattle             , "Генеральное сражение"    }
+        , { WSTR::BattleType::FrontLine                 , "Линия фронта"            }
+        , { WSTR::BattleType::Tournament                , "Турнир или против ИИ"    }
+        , { WSTR::BattleType::GK                        , "ГК"                      }
+    };
+
+    ///
+    ///
+    ///
+    std::map<std::string, std::string> dataString_{
+        { "dateTime"                , defaultStringEmpty_ }
+        , { "vehicle"               , defaultStringEmpty_ }
+        , { "mapName"               , defaultStringEmpty_ }
+        , { "mapDisplayName"        , defaultStringEmpty_ }
+        , { "replayName"            , defaultStringEmpty_ }
+        , { "clientVersionFromXml"  , defaultStringEmpty_ }
+        , { "playerName"            , defaultStringEmpty_ }
+        , { "playerVehicle"         , defaultStringEmpty_ }
+        , { "battleType"            , defaultStringEmpty_ }
+    };
+
+    ///
+    ///
+    ///
+    std::map<std::string, size_t> dataSize_t_{
+        { "playerID"            , defaultSize_tEmpty_ }
+        , { "arenaCreateTime"   , defaultSize_tEmpty_ }
+        , { "id"                , defaultSize_tEmpty_ }
+        , { "size"              , defaultSize_tEmpty_ }
+        , { "respawn"           , defaultSize_tEmpty_ }
+        , { "duration"          , defaultSize_tEmpty_ }
+        , { "winnerTeam"        , defaultSize_tEmpty_ }
+    };
+
+    ///
+    ///
+    ///
+    std::map<std::string, bool> dataBool_{
+        { "validity"    , defaultBoolEmpty_ }
+        , { "isReplay"  , defaultBoolEmpty_ }
+        , { "hasMods"   , defaultBoolEmpty_ }
+    };
+
+    ///
+    ///
+    ///
     std::vector<std::string> alliedTeam_{30};
+
+    ///
+    ///
+    ///
     std::vector<std::string> opposingTeam_{30};
 
-    static inline const std::string defaultStringEmpty_ = "-";
-    static constexpr size_t defaultSize_tEmpty_{ 0 };
-    static constexpr bool defaultBoolEmpty_{ false };
-
-    std::map<std::string, std::string> dataString_{
-        { "dateTime", defaultStringEmpty_ }
-        , { "vehicle", defaultStringEmpty_ }
-        , { "mapName", defaultStringEmpty_ }
-        , { "mapDisplayName", defaultStringEmpty_ }
-        , { "replayName", defaultStringEmpty_ }
-        , { "clientVersionFromXml", defaultStringEmpty_ }
-        , { "playerName", defaultStringEmpty_ }
-        , { "playerVehicle", defaultStringEmpty_ }
-    };
-    std::map<std::string, size_t> dataSize_t_{
-        { "playerID", defaultSize_tEmpty_ }
-        , { "arenaCreateTime", defaultSize_tEmpty_ }
-        , { "id", defaultSize_tEmpty_ }
-        , { "size", defaultSize_tEmpty_ }
-        , { "respawn", defaultSize_tEmpty_ }
-        , { "duration", defaultSize_tEmpty_ }
-        , { "winnerTeam", defaultSize_tEmpty_ }
-        , { "battleType", defaultSize_tEmpty_ }
-    };
-    std::map<std::string, bool> dataBool_{
-        { "validity", defaultBoolEmpty_ }
-        , { "isReplay", defaultBoolEmpty_ }
-        , { "hasMods", defaultBoolEmpty_ }
-    };
 
 public:             // PUBLIC FUNCTIONS
-    Replay() = default;
+    Replay();
+    ~Replay();
+
+    template <typename TypeReplay>
+    Replay(TypeReplay&& replay);
 
     template <typename TypeFileName>
     Replay(TypeFileName&& filename, size_t id);
@@ -75,6 +124,11 @@ public:             // PUBLIC FUNCTIONS
     bool setClientVersionFromXML(const std::string &newClientVersionFromXML);
 
 
+    static WSTR::BattleType getBattleType(const std::string& index);
+    static size_t getCount();
+    static size_t getCountValidity();
+    static void clearCountValidity();
+
 public:
 
 
@@ -83,16 +137,16 @@ public:
     /// \param key
     /// \return
     ///
-    template <typename Type>
-    constexpr std::decay_t<Type> getValue(std::string_view key) const;
+    template <typename Type, typename KeyType>
+    constexpr std::decay_t<Type> getValue(KeyType&& key) const;
 
     ///
     /// \brief isGetValue
     /// \param key
     /// \return
     ///
-    template <typename Type>
-    constexpr std::pair<std::decay_t<Type>, bool> isGetValue(std::string_view key) const;
+    template <typename Type, typename KeyType>
+    constexpr std::pair<std::decay_t<Type>, bool> isGetValue(KeyType&& key) const;
 
     ///
     /// \brief setValue
@@ -109,8 +163,8 @@ public:
     /// \param value
     /// \return
     ///
-    template <typename Type>
-    constexpr bool checkValue(const std::string& key) const;
+    template <typename Type, typename KeyType>
+    constexpr bool checkValue(KeyType&& key) const;
 
     ///
     /// \brief setCheckValue
@@ -122,7 +176,6 @@ public:
 
 
 private:
-
 
     ///
     /// \brief fstreamSize
@@ -180,13 +233,26 @@ private:
     template <typename Type>
     constexpr std::decay_t<Type> get(std::istream& stream, size_t size = sizeof(Type));
 
-
 };
 
 
 
 
 //////////////////////////// implementation of class functions /////////////////////////////////////////////
+
+
+///
+/// \brief Replay::Replay
+/// \param replay
+///
+template <typename TypeReplay>
+Replay::Replay(TypeReplay&& replay)
+    : dataString_(std::forward<TypeReplay>(replay).dataString_)
+    , dataSize_t_(std::forward<TypeReplay>(replay).dataSize_t_)
+    , dataBool_(std::forward<TypeReplay>(replay).dataBool_) {
+
+    ++count_;
+}
 
 ///
 /// \brief Replay::Replay
@@ -195,6 +261,8 @@ private:
 template <typename TypeFileName>
 Replay
 ::Replay(TypeFileName&& filename, size_t id){
+
+    ++count_;
 
     if(!parseFileWotreplay(std::forward<TypeFileName>(filename), id)) return;
     setIsReplay(true);
@@ -210,7 +278,8 @@ template <typename TypeFileName>
 bool Replay
 ::parseFileWotreplay(TypeFileName&& filename, size_t id){
 
-    WSTR::Replay newReplay{};
+    Replay newReplay{};
+
     newReplay.setId(id);
 
     std::string fname{ std::forward<TypeFileName>(filename) };
@@ -225,10 +294,12 @@ bool Replay
         file.close();
         return false;
     }
-    newReplay.setIsReplay(true);    
+    newReplay.setIsReplay(true);
 
     auto isValidity{ get<int>(file) == 2 };
     newReplay.setValidity(isValidity);
+
+    if(isValidity) ++countValidity_;
 
     auto sizeFirstBlock{ get<int>(file) };
 
@@ -247,7 +318,8 @@ bool Replay
     }
 
     file.close();
-    std::swap(newReplay, *this);
+
+    std::swap(*this, newReplay);
     return true;
 }
 
@@ -301,10 +373,10 @@ constexpr std::decay_t<Type> Replay
 /// \param key
 /// \return
 ///
-template <typename Type>
-constexpr std::decay_t<Type> Replay::getValue(std::string_view key) const{
+template <typename Type, typename KeyType>
+constexpr std::decay_t<Type> Replay::getValue(KeyType&& key) const{
     using type = std::decay_t<Type>;
-    auto&& [value, isValue] = isGetValue<type>(key);
+    auto&& [value, isValue] = isGetValue<type>(std::forward<KeyType>(key));
     if(isValue) return value;
     return type();
 }
@@ -314,15 +386,21 @@ constexpr std::decay_t<Type> Replay::getValue(std::string_view key) const{
 /// \param key
 /// \return
 ///
-template <typename Type>
-constexpr std::pair<std::decay_t<Type>, bool> Replay::isGetValue(std::string_view key) const{
+template <typename Type, typename KeyType>
+constexpr std::pair<std::decay_t<Type>, bool> Replay::isGetValue(KeyType&& key) const{
+
     using type = std::decay_t<Type>;
+    using keyType = std::decay_t<KeyType>;
 
-    constexpr bool typeIsBool   { std::is_same_v<type, bool>        };
-    constexpr bool typeIsString { std::is_same_v<type, std::string> };
-    constexpr bool typeIsSize_t { std::is_same_v<type, size_t>      };
+    constexpr bool typeIsBool       { std::is_same_v<type, bool>                };
+    constexpr bool typeIsString     { std::is_same_v<type, std::string>         };
+    constexpr bool typeIsSize_t     { std::is_same_v<type, size_t>              };
+    constexpr bool isStringView { std::is_convertible_v<keyType, std::string_view>    };
 
-    if constexpr (typeIsBool){
+    constexpr bool typeIsBattleType { std::is_same_v<type, std::string> &&  std::is_same_v<keyType, WSTR::BattleType>   };
+
+
+    if constexpr (typeIsBool && isStringView){
         try{
             return { dataBool_.at(key.data()), true };
         }
@@ -331,7 +409,7 @@ constexpr std::pair<std::decay_t<Type>, bool> Replay::isGetValue(std::string_vie
             return { type(), false };
         }
     }
-    else if constexpr (typeIsString) {
+    else if constexpr (typeIsString && isStringView) {
         try{
             return { dataString_.at(key.data()), true };
         }
@@ -340,7 +418,7 @@ constexpr std::pair<std::decay_t<Type>, bool> Replay::isGetValue(std::string_vie
             return { type(), false };
         }
     }
-    else if constexpr (typeIsSize_t) {
+    else if constexpr (typeIsSize_t && isStringView) {
         try{
             return { dataSize_t_.at(key.data()), true };
         }
@@ -349,7 +427,17 @@ constexpr std::pair<std::decay_t<Type>, bool> Replay::isGetValue(std::string_vie
             return { type(), false };
         }
     }
-    static_assert(typeIsBool || typeIsString || typeIsSize_t, "Invalid type specified!");
+    else if constexpr (typeIsBattleType) {
+        try{
+            return { battleList_.at(key), true };
+        }
+        catch(...){
+            assert("ERROR !!! std::out_of_range!");
+            return { type(), false };
+        }
+    }
+    static_assert(((typeIsBool || typeIsString || typeIsSize_t) &&  isStringView )
+            || typeIsBattleType, "Invalid type specified!");
     return { type(), false };
 }
 
@@ -386,9 +474,9 @@ void Replay::setValue(const std::string& key, Type&& newValue){
 /// \param value
 /// \return
 ///
-template <typename Type>
-constexpr bool Replay::checkValue(const std::string& key) const {
-    auto&& [_, isValue] = isGetValue<std::decay_t<Type>>(key);
+template <typename Type, typename KeyType>
+constexpr bool Replay::checkValue(KeyType&& key) const {
+    auto&& [_, isValue] = isGetValue<std::decay_t<Type>>(std::forward<KeyType>(key));
     return isValue;
 }
 
