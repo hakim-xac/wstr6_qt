@@ -10,6 +10,7 @@
 #include <QString>
 #include <cassert>
 #include <QJsonObject>
+#include <mutex>
 #include "enums.h"
 
 namespace WSTR {
@@ -24,7 +25,8 @@ private:            // PRIVATE VARIABLES
     static constexpr bool defaultBoolEmpty_             { false };
     static inline size_t count_                         {};
     static inline size_t countValidity_                 {};
-
+    static inline std::mutex mxCount_                   {};
+    static inline std::mutex mxCountValidity_           {};
     ///
     ///
     ///
@@ -95,11 +97,10 @@ private:            // PRIVATE VARIABLES
 
 
 public:             // PUBLIC FUNCTIONS
-    Replay();
-    ~Replay();
+    Replay() = default;
+    ~Replay() = default;
 
-    template <typename TypeReplay>
-    Replay(TypeReplay&& replay);
+
 
     template <typename TypeFileName>
     Replay(TypeFileName&& filename, size_t id);
@@ -127,8 +128,7 @@ public:             // PUBLIC FUNCTIONS
     static WSTR::BattleType getBattleType(const std::string& index);
     static size_t getCount();
     static size_t getCountValidity();
-    static void clearCountValidity();
-
+    static void clearCounts();
 public:
 
 
@@ -138,7 +138,7 @@ public:
     /// \return
     ///
     template <typename Type, typename KeyType>
-    constexpr std::decay_t<Type> getValue(KeyType&& key) const;
+    constexpr std::decay_t<Type> getValue(KeyType&& key) const noexcept;
 
     ///
     /// \brief isGetValue
@@ -146,7 +146,7 @@ public:
     /// \return
     ///
     template <typename Type, typename KeyType>
-    constexpr std::pair<std::decay_t<Type>, bool> isGetValue(KeyType&& key) const;
+    constexpr std::pair<std::decay_t<Type>, bool> isGetValue(KeyType&& key) const noexcept;
 
     ///
     /// \brief setValue
@@ -155,7 +155,7 @@ public:
     /// \return
     ///
     template <typename Type>
-    void setValue(const std::string& key, Type&& newValue);
+    void setValue(const std::string& key, Type&& newValue) noexcept;
 
     ///
     /// \brief checkValue
@@ -164,7 +164,7 @@ public:
     /// \return
     ///
     template <typename Type, typename KeyType>
-    constexpr bool checkValue(KeyType&& key) const;
+    constexpr bool checkValue(KeyType&& key) const noexcept;
 
     ///
     /// \brief setCheckValue
@@ -172,7 +172,7 @@ public:
     /// \param newValue
     ///
     template <typename Type>
-    bool setCheckValue(const std::string& key, Type&& newValue);
+    bool setCheckValue(const std::string& key, Type&& newValue) noexcept;
 
 
 private:
@@ -240,20 +240,6 @@ private:
 
 //////////////////////////// implementation of class functions /////////////////////////////////////////////
 
-
-///
-/// \brief Replay::Replay
-/// \param replay
-///
-template <typename TypeReplay>
-Replay::Replay(TypeReplay&& replay)
-    : dataString_(std::forward<TypeReplay>(replay).dataString_)
-    , dataSize_t_(std::forward<TypeReplay>(replay).dataSize_t_)
-    , dataBool_(std::forward<TypeReplay>(replay).dataBool_) {
-
-    ++count_;
-}
-
 ///
 /// \brief Replay::Replay
 /// \param filename
@@ -261,8 +247,6 @@ Replay::Replay(TypeReplay&& replay)
 template <typename TypeFileName>
 Replay
 ::Replay(TypeFileName&& filename, size_t id){
-
-    ++count_;
 
     if(!parseFileWotreplay(std::forward<TypeFileName>(filename), id)) return;
     setIsReplay(true);
@@ -299,7 +283,9 @@ bool Replay
     auto isValidity{ get<int>(file) == 2 };
     newReplay.setValidity(isValidity);
 
+    mxCountValidity_.lock();
     if(isValidity) ++countValidity_;
+    mxCountValidity_.unlock();
 
     auto sizeFirstBlock{ get<int>(file) };
 
@@ -318,6 +304,10 @@ bool Replay
     }
 
     file.close();
+
+    mxCount_.lock();
+    ++count_;
+    mxCount_.unlock();
 
     std::swap(*this, newReplay);
     return true;
@@ -374,7 +364,7 @@ constexpr std::decay_t<Type> Replay
 /// \return
 ///
 template <typename Type, typename KeyType>
-constexpr std::decay_t<Type> Replay::getValue(KeyType&& key) const{
+constexpr std::decay_t<Type> Replay::getValue(KeyType&& key) const noexcept{
     using type = std::decay_t<Type>;
     auto&& [value, isValue] = isGetValue<type>(std::forward<KeyType>(key));
     if(isValue) return value;
@@ -387,7 +377,7 @@ constexpr std::decay_t<Type> Replay::getValue(KeyType&& key) const{
 /// \return
 ///
 template <typename Type, typename KeyType>
-constexpr std::pair<std::decay_t<Type>, bool> Replay::isGetValue(KeyType&& key) const{
+constexpr std::pair<std::decay_t<Type>, bool> Replay::isGetValue(KeyType&& key) const noexcept{
 
     using type = std::decay_t<Type>;
     using keyType = std::decay_t<KeyType>;
@@ -447,7 +437,7 @@ constexpr std::pair<std::decay_t<Type>, bool> Replay::isGetValue(KeyType&& key) 
 /// \param newValue
 ///
 template <typename Type>
-void Replay::setValue(const std::string& key, Type&& newValue){
+void Replay::setValue(const std::string& key, Type&& newValue) noexcept {
 
     using type = std::decay_t<Type>;
 
@@ -475,7 +465,7 @@ void Replay::setValue(const std::string& key, Type&& newValue){
 /// \return
 ///
 template <typename Type, typename KeyType>
-constexpr bool Replay::checkValue(KeyType&& key) const {
+constexpr bool Replay::checkValue(KeyType&& key) const noexcept {
     auto&& [_, isValue] = isGetValue<std::decay_t<Type>>(std::forward<KeyType>(key));
     return isValue;
 }
@@ -486,7 +476,7 @@ constexpr bool Replay::checkValue(KeyType&& key) const {
 /// \param newValue
 ///
 template <typename Type>
-bool Replay::setCheckValue(const std::string& key, Type&& newValue){
+bool Replay::setCheckValue(const std::string& key, Type&& newValue) noexcept{
 
     Type value{ std::forward<Type>(newValue) };
 

@@ -6,6 +6,8 @@
 #include "settings.h"
 #include "replay.h"
 #include <sstream>
+#include <thread>
+#include <mutex>
 
 
 QT_BEGIN_NAMESPACE
@@ -32,6 +34,8 @@ private slots:
     void on_checkBox_clicked();
 
 
+
+    void on_checkBox_stateChanged(int arg1);
 
 private:
     ///
@@ -93,7 +97,7 @@ private:
     /// \param mp
     ///
     template <typename Type/*, typename std::enable_if_t<WSTR::IsMap<Type>::type>*/>
-    void setCurrentItem(QTableWidget& table, const std::vector<WSTR::Replay> &vec, const Type& mp);
+    static void setCurrentItem(QTableWidget& table, const std::vector<WSTR::Replay> &vec, const Type& mp);
 
     ///
     /// \brief toThreadStatusBar
@@ -109,7 +113,15 @@ private:
     ///
     static void showStatusBar(const QString& str, QLabel* const label, int waitSec);
 
+    std::pair<std::vector<WSTR::Replay>, bool> createVectorWotReplays(const QList<QFileInfo>& listFiles);
+
+    template< class TypeVecIter, class TypePaths>
+    static void addToThread(TypeVecIter first, TypeVecIter begin, TypeVecIter end, const TypePaths& basePaths);
+
 private:
+    ///
+    /// \brief ui
+    ///
     Ui::MainWindow *ui;
 
     ///
@@ -117,6 +129,7 @@ private:
     ///
     WSTR::Settings settings;
 
+    uint countThreads_;
 };
 
 

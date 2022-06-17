@@ -9,6 +9,7 @@
 #include <map>
 #include <QThread>
 #include <thread>
+#include <functional>
 #include <chrono>
 
 ///
@@ -18,6 +19,7 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
+    , countThreads_(std::thread::hardware_concurrency())
 {
     ui->setupUi(this);
     settings.logs.pushAndFlash("MainWindow Initializated", WSTR::AppType::Debug);
@@ -30,6 +32,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->tableWidget->horizontalHeader()->show();
     ui->tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers); // prohibition of editing
     ui->tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
+
 
 }
 
@@ -198,6 +201,68 @@ void MainWindow::showStatusBar(const QString &str, QLabel* const label, int wait
     label->setText(QString());
 }
 
+std::pair<std::vector<WSTR::Replay>, bool> MainWindow::createVectorWotReplays(const QList<QFileInfo>& listFiles)
+{     
+    if(!listFiles.size()) return { {}, false };
+
+    ui->runScan->setEnabled(false);
+
+    size_t size{ static_cast<size_t>(listFiles.size()) };
+
+    size_t minThreads{ std::min(static_cast<size_t>((countThreads_ ? countThreads_ - 1 : 2)), size) };
+
+    std::vector<std::thread> threads;
+    threads.reserve(minThreads);
+
+    std::vector<WSTR::Replay> vecReplays(size);
+
+    size_t part{ std::max(size / minThreads, size_t(1)) };
+
+    using iter = decltype(vecReplays.begin());
+    using type_paths = decltype(listFiles);
+
+    for(size_t i{}, ie{ minThreads }; i != ie; ++i){
+
+        size_t begin{ part * i };
+        size_t end{ part * (i + 1) };
+
+        if(i == ie - 1) end = size;
+
+        threads.emplace_back(std::thread(&MainWindow::addToThread<iter, type_paths>
+                                         , vecReplays.begin()
+                                         , vecReplays.begin() + begin
+                                         , vecReplays.begin() + end
+                                         , std::cref(listFiles)));
+    }
+
+    for(auto&& elem: threads){
+        if(elem.joinable()) elem.join();
+    }
+
+    ui->runScan->setEnabled(true);
+
+    return { vecReplays, true };
+}
+
+
+
+/////
+/// \brief MainWindow::addToThread
+/// \param first
+/// \param begin
+/// \param end
+/// \param basePaths
+///
+template< class TypeVecIter, class TypePaths>
+void MainWindow::addToThread(TypeVecIter first, TypeVecIter begin, TypeVecIter end, const TypePaths& basePaths){
+
+    if(end - begin <= 0) return;
+    for(auto it{ begin }, ite{ end }; it != ite; ++it){
+        auto distance{ std::distance(first, it) };
+        *it = std::move(WSTR::Replay(basePaths[distance].absoluteFilePath().toStdString(), distance));
+    }
+}
+
 ///
 /// \brief MainWindow::on_pushButton_clicked
 ///
@@ -251,6 +316,7 @@ void MainWindow::on_paths_activated(int index)
 
 void MainWindow::on_checkBox_clicked()
 {
+
 #if 0
     //
     auto listFiles { scanDirectory(ui->paths->itemText(ui->paths->currentIndex())) };
@@ -304,22 +370,32 @@ void MainWindow::on_runScan_clicked()
     }
 
     //*  BE SURE TO CALL !!!  *///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    WSTR::Replay::clearCountValidity(); // if not called, then the result of "valid replays" is incorrect.
+    WSTR::Replay::clearCounts(); // if not called, then the result of "valid replays" is incorrect.
 
-
-    std::vector<WSTR::Replay> vecReplays;
-    vecReplays.reserve(listFiles.size());
 
     ui->tableWidget->setEnabled(false);
-    {
-        for(size_t i{}, ie{ static_cast<size_t>(listFiles.size()) }; i < ie; ++i){
-            vecReplays.emplace(vecReplays.end(), listFiles[i].absoluteFilePath().toStdString(), i);
-        };
+
+    auto&& [vecReplays, isVecReplays] = createVectorWotReplays(listFiles);
+
+    if(!isVecReplays) {
+        settings.logs.pushAndFlash("    auto&& [vecReplays, isVecReplays] = createVectorWotReplays(listFiles);\
+                                   if(!isVecReplays) == false");
+        toThreadStatusBar("Неизвестная Ошибка!", ui->statusBar);
+        return;
     }
 
     replaysToTable(*ui->tableWidget, vecReplays);
+
+    //ui->tableWidget->sortByColumn(0, Qt::SortOrder::AscendingOrder);
     toThreadStatusBar("Обновлено!", ui->statusBar);
     ui->tableWidget->setEnabled(true);
+
+
+}
+
+
+void MainWindow::on_checkBox_stateChanged(int arg1)
+{
 
 
 }

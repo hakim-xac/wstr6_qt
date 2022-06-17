@@ -11,24 +11,11 @@ namespace WSTR{
 ///////////////////////////////////////////////////////////////////////////////////
 
 
-
 ///
 /// \brief Replay::setValidity
 /// \param newValidity
+/// \return
 ///
-
-Replay::Replay()
-{
-    ++count_;
-}
-
-Replay::~Replay()
-{
-    --count_;
-}
-
-
-
 bool Replay::setValidity(bool newValidity)
 {
     return setCheckValue("validity", newValidity);
@@ -224,9 +211,15 @@ size_t Replay::getCountValidity()
     return countValidity_;
 }
 
-void Replay::clearCountValidity()
+void Replay::clearCounts()
 {
+    mxCount_.lock();
+    count_ = 0;
+    mxCount_.unlock();
+
+    mxCountValidity_.lock();
     countValidity_ = 0;
+    mxCountValidity_.unlock();
 }
 
 

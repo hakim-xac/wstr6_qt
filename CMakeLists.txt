@@ -25,6 +25,7 @@ set(PROJECT_SOURCES
         settings.cpp
         logs.cpp
         replay.cpp
+
         mainwindow.h
         mainwindow.ui
         settings.h
