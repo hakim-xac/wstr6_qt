@@ -198,14 +198,6 @@ private:            // PRIVATE FUNCTIONS
     bool checkIsHeaderValue(std::string_view value);
 
 
-public:             // PUBLIC VARIABLES
-
-    ///
-    ///
-    ///
-    Logs logs{ std::cout };
-
-
 public:             // PUBLIC FUNCTIONS
 
     Settings();
@@ -362,14 +354,16 @@ bool Settings::checkValue(KeyType&& key, ValueType&& value, SelectBase sb)
         std::stringstream ss{ "bool Settings::checkValue(KeyType&& key, ValueType&& value, SelectBase sb)\n" };
         ss << "auto&& [newValue, isGet] = getValue(key, sb);\n";
         ss << "isGet == FALSE\n";
-        logs.pushAndFlash(ss.str(), WSTR::AppType::Debug);
+
+        WSTR::Logs::pushAndFlash(ss.str(), WSTR::AppType::Debug);
         return false;
     }
     if(newValue != std::forward<ValueType>(value)) {
         std::stringstream ss{ "bool Settings::checkValue(KeyType&& key, ValueType&& value, SelectBase sb)\n" };
         ss << "auto&& [newValue, isGet] = getValue(key, sb);\n";
         ss << "(newValue == value) == FALSE \n";
-        logs.pushAndFlash(ss.str(), WSTR::AppType::Debug);
+
+        WSTR::Logs::pushAndFlash(ss.str(), WSTR::AppType::Debug);
         return false;
     }
     return true;

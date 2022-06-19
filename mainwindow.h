@@ -182,14 +182,14 @@ std::pair< QString, bool > MainWindow
 template <typename Type>
 void MainWindow
 ::toStatusBar(Type&& str){
-    settings.logs.push(str);
+    WSTR::Logs::push(str);
 
     std::stringstream ss{"Error transform!\n"};
     ss << "String: " << str;
 
     auto&& [new_str, isTransform] = toQString(std::forward<Type>(str));
     if(!isTransform){
-        settings.logs.pushAndFlash(ss.str(), WSTR::AppType::Debug);
+        WSTR::Logs::pushAndFlash(ss.str(), WSTR::AppType::Debug);
         return;
     }
     ui->statusBar->setText(std::move(new_str));

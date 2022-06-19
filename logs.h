@@ -16,19 +16,18 @@ class Logs
     ///
     ///
     ///
-    std::stringstream base_{};
+    static inline std::stringstream base_{};
 
     ///
     ///
     ///
-    std::ostream& out_{ std::cout };
+    static inline std::ostream& out_{ std::cout };
 
 
-    AppType currentApplicationType_{ AppType::Release };
+    static inline AppType currentApplicationType_{ AppType::Debug };
 
 public:
     Logs() = default;
-    Logs(std::ostream& out);
     ~Logs();
 
     ///
@@ -36,19 +35,19 @@ public:
     /// \param elem
     ///
     template <typename Type>
-    void push(Type&& elem, WSTR::AppType appType = WSTR::AppType::Release);
+    static void push(Type&& elem, WSTR::AppType appType = WSTR::AppType::Release);
 
     ///
     /// \brief flush
     ///
-    void flush();
+    static void flush();
 
     ///
     /// \brief push
     /// \param elem
     ///
     template <typename Type>
-    void pushAndFlash(Type&& elem, WSTR::AppType appType = WSTR::AppType::Release);
+    static void pushAndFlash(Type&& elem, WSTR::AppType appType = WSTR::AppType::Release);
 
 };
 

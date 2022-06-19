@@ -23,7 +23,7 @@ MainWindow::MainWindow(QWidget *parent)
     , countThreads_(std::thread::hardware_concurrency())    
 {
     ui->setupUi(this);
-    settings.logs.pushAndFlash("MainWindow Initializated", WSTR::AppType::Debug);
+    WSTR::Logs::pushAndFlash("MainWindow Initializated", WSTR::AppType::Debug);
 
     settings.load();
 
@@ -45,7 +45,7 @@ MainWindow::~MainWindow()
 void MainWindow::variableInitialization()
 {
     using namespace std::string_literals;
-    settings.logs.pushAndFlash("start MainWindow::variableInitialization()", WSTR::AppType::Debug);
+    WSTR::Logs::pushAndFlash("start MainWindow::variableInitialization()", WSTR::AppType::Debug);
 
     ui->tableWidget->verticalHeader()->hide();
     ui->tableWidget->horizontalHeader()->show();
@@ -57,7 +57,7 @@ void MainWindow::variableInitialization()
 
     toThreadStatusBar("ХАЙ!", ui->statusBar, 5);
 
-    settings.logs.pushAndFlash("end MainWindow::variableInitialization()", WSTR::AppType::Debug);
+    WSTR::Logs::pushAndFlash("end MainWindow::variableInitialization()", WSTR::AppType::Debug);
 }
 
 ///
@@ -67,12 +67,12 @@ void MainWindow::variableInitialization()
 void MainWindow::initPathsView()
 {
     using namespace std::string_literals;
-    settings.logs.pushAndFlash("start MainWindow::initPathsView()", WSTR::AppType::Debug);
+    WSTR::Logs::pushAndFlash("start MainWindow::initPathsView()", WSTR::AppType::Debug);
 
     auto&& [countPaths_s, isCountPath] = settings.getValue("countOfPaths"s);
     if(isCountPath){
 
-        settings.logs.pushAndFlash("isCountPath == true", WSTR::AppType::Debug);
+        WSTR::Logs::pushAndFlash("isCountPath == true", WSTR::AppType::Debug);
 
         QStringList paths;
         auto&& [countPaths_i, isCountPaths_s] = settings.toType<int>(countPaths_s);
@@ -81,10 +81,10 @@ void MainWindow::initPathsView()
             std::stringstream ss{"auto [countPaths_i, isCountPaths_s] = toType<int>(countPaths_s);\n"};
             ss << "isCountPaths_s == false\n";
             ss << "countPaths_i: " << countPaths_i << " isCountPaths_s: " << isCountPaths_s << "\n";
-            settings.logs.pushAndFlash(ss.str(), WSTR::AppType::Debug);
+            WSTR::Logs::pushAndFlash(ss.str(), WSTR::AppType::Debug);
             return;
         }
-        settings.logs.pushAndFlash("isCountPaths_s == true", WSTR::AppType::Debug);
+        WSTR::Logs::pushAndFlash("isCountPaths_s == true", WSTR::AppType::Debug);
 
         for(size_t i{}; i < countPaths_i; ++i){
             auto&& [path, isPath] = settings.getValue("path_"s+std::to_string(i), WSTR::SelectBase::Paths);
@@ -109,15 +109,15 @@ void MainWindow::initPathsView()
             }
             return;
         }
-        settings.logs.pushAndFlash("paths.size() == 0", WSTR::AppType::Debug);
+        WSTR::Logs::pushAndFlash("paths.size() == 0", WSTR::AppType::Debug);
     }
-    settings.logs.pushAndFlash("isCountPath == false", WSTR::AppType::Debug);
+    WSTR::Logs::pushAndFlash("isCountPath == false", WSTR::AppType::Debug);
 
     settings.setValue("path_0", settings.getDefaultPath().toStdString(), WSTR::SelectBase::Paths);
     settings.save();
     ui->paths->addItem(settings.getDefaultPath());
 
-    settings.logs.pushAndFlash("end MainWindow::initPathsView()", WSTR::AppType::Debug);
+    WSTR::Logs::pushAndFlash("end MainWindow::initPathsView()", WSTR::AppType::Debug);
 
 }
 
@@ -129,7 +129,7 @@ void MainWindow::clearTable(QTableWidget *table)
 {
 
     if(!table){
-        settings.logs.pushAndFlash("void MainWindow::clearTable(QTableWidget *table) \
+        WSTR::Logs::pushAndFlash("void MainWindow::clearTable(QTableWidget *table) \
 (table == nullptr) == true", WSTR::AppType::Debug);
         return;
     }
@@ -149,7 +149,7 @@ void MainWindow::clearTable(QTableWidget *table)
 void MainWindow::toThreadStatusBar(QString&& str, QLabel* const label, int waitSec)
 {
         if(!label){
-            settings.logs.pushAndFlash("void MainWindow::toThreadStatusBar(QString&& str, QLabel* const label, int waitSec) \
+            WSTR::Logs::pushAndFlash("void MainWindow::toThreadStatusBar(QString&& str, QLabel* const label, int waitSec) \
     (label == nullptr) == true", WSTR::AppType::Debug);
             return;
         }
@@ -182,8 +182,11 @@ void MainWindow::toThreadStatusBar(QString&& str, QLabel* const label, int waitS
 ///
 void MainWindow::showStatusBar(const QString &str, QLabel* const label, int waitSec)
 {
-
-    if(!label) return;
+    if(!label){
+        WSTR::Logs::pushAndFlash("void MainWindow::showStatusBar(const QString &str, QLabel* const label, int waitSec) \
+(label == nullptr) == true", WSTR::AppType::Debug);
+        return;
+    }
 
     label->setText(str);
     QThread::sleep(waitSec);
@@ -194,7 +197,7 @@ std::pair<std::vector<WSTR::Replay>, bool> MainWindow::createVectorWotReplays(co
 {
     if(!listFiles.size()){
 
-        settings.logs.pushAndFlash("std::pair<std::vector<WSTR::Replay>, bool> MainWindow::createVectorWotReplays(const QList<QFileInfo>& listFiles) \
+    WSTR::Logs::pushAndFlash("std::pair<std::vector<WSTR::Replay>, bool> MainWindow::createVectorWotReplays(const QList<QFileInfo>& listFiles) \
     if(!listFiles.size()) == true", WSTR::AppType::Debug);
 
         return { {}, false };
@@ -377,7 +380,7 @@ void MainWindow::on_runScan_clicked()
     auto&& [vecReplays, isVecReplays] = createVectorWotReplays(listFiles);
 
     if(!isVecReplays) {
-        settings.logs.pushAndFlash("    auto&& [vecReplays, isVecReplays] = createVectorWotReplays(listFiles);\
+        WSTR::Logs::pushAndFlash("    auto&& [vecReplays, isVecReplays] = createVectorWotReplays(listFiles);\
                                    if(!isVecReplays) == false");
         toThreadStatusBar("Неизвестная Ошибка!", ui->statusBar);
 
