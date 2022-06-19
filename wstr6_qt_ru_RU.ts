@@ -51,7 +51,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="273"/>
+        <location filename="mainwindow.cpp" line="268"/>
         <source>Open Directory</source>
         <translation type="unfinished"></translation>
     </message>

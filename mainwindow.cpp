@@ -19,7 +19,8 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , countThreads_(std::thread::hardware_concurrency())
+    , settings()
+    , countThreads_(std::thread::hardware_concurrency())    
 {
     ui->setupUi(this);
     settings.logs.pushAndFlash("MainWindow Initializated", WSTR::AppType::Debug);
@@ -27,12 +28,6 @@ MainWindow::MainWindow(QWidget *parent)
     settings.load();
 
     variableInitialization();
-
-    ui->tableWidget->verticalHeader()->hide();
-    ui->tableWidget->horizontalHeader()->show();
-    ui->tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers); // prohibition of editing
-    ui->tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
-
 
 }
 
@@ -51,6 +46,12 @@ void MainWindow::variableInitialization()
 {
     using namespace std::string_literals;
     settings.logs.pushAndFlash("start MainWindow::variableInitialization()", WSTR::AppType::Debug);
+
+    ui->tableWidget->verticalHeader()->hide();
+    ui->tableWidget->horizontalHeader()->show();
+    ui->tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers); // prohibition of editing
+    ui->tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->progressBar->setValue(0);
 
     initPathsView();
 
@@ -124,38 +125,20 @@ void MainWindow::initPathsView()
 /// \brief MainWindow::clearTable
 /// \param table
 ///
-void MainWindow::clearTable(QTableWidget *table) const
+void MainWindow::clearTable(QTableWidget *table)
 {
-    if(!table) return;
+
+    if(!table){
+        settings.logs.pushAndFlash("void MainWindow::clearTable(QTableWidget *table) \
+(table == nullptr) == true", WSTR::AppType::Debug);
+        return;
+    }
     ui->allCount->setText("0");
     ui->allValidity->setText("0");
     table->setColumnCount(0);
     table->setRowCount(0);
     table->clearContents();
-}
-
-///
-/// \brief MainWindow::replaysToTable
-/// \param table
-/// \param vec
-/// \return
-///
- bool MainWindow::replaysToTable(QTableWidget& table, const std::vector<WSTR::Replay> &vec)
-{
-    if(vec.size() == 0) return false;
-    table.clear();
-
-    table.setRowCount(static_cast<int>(vec.size()));
-    table.setColumnCount(settings.getCountHeaderList());
-
-    auto&& [headerMap, isHeaderMap] = setHeaderInTable(table);
-    if(!isHeaderMap) return false;
-
-    setCurrentItem(table, vec, headerMap);
-
-    ui->allCount->setText(QString::number(WSTR::Replay::getCount()));
-    ui->allValidity->setText(QString::number(WSTR::Replay::getCountValidity()));
-    return true;
+    ui->progressBar->setValue(0);
 }
 
 ///
@@ -165,7 +148,11 @@ void MainWindow::clearTable(QTableWidget *table) const
 ///
 void MainWindow::toThreadStatusBar(QString&& str, QLabel* const label, int waitSec)
 {
-        if(!label) return;
+        if(!label){
+            settings.logs.pushAndFlash("void MainWindow::toThreadStatusBar(QString&& str, QLabel* const label, int waitSec) \
+    (label == nullptr) == true", WSTR::AppType::Debug);
+            return;
+        }
 
         using time = std::chrono::high_resolution_clock;
         using ms = std::chrono::milliseconds;
@@ -195,15 +182,23 @@ void MainWindow::toThreadStatusBar(QString&& str, QLabel* const label, int waitS
 ///
 void MainWindow::showStatusBar(const QString &str, QLabel* const label, int waitSec)
 {
+
     if(!label) return;
+
     label->setText(str);
     QThread::sleep(waitSec);
     label->setText(QString());
 }
 
 std::pair<std::vector<WSTR::Replay>, bool> MainWindow::createVectorWotReplays(const QList<QFileInfo>& listFiles)
-{     
-    if(!listFiles.size()) return { {}, false };
+{
+    if(!listFiles.size()){
+
+        settings.logs.pushAndFlash("std::pair<std::vector<WSTR::Replay>, bool> MainWindow::createVectorWotReplays(const QList<QFileInfo>& listFiles) \
+    if(!listFiles.size()) == true", WSTR::AppType::Debug);
+
+        return { {}, false };
+    }
 
     ui->runScan->setEnabled(false);
 
@@ -361,7 +356,9 @@ void MainWindow::on_checkBox_clicked()
 void MainWindow::on_runScan_clicked()
 {
     clearTable(ui->tableWidget);
+
     QString filters{ "*.wotreplay" };
+
     auto listFiles { scanDirectory(ui->paths->itemText(ui->paths->currentIndex()), filters) };
 
     if(listFiles.size() == 0){
@@ -372,8 +369,10 @@ void MainWindow::on_runScan_clicked()
     //*  BE SURE TO CALL !!!  *///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     WSTR::Replay::clearCounts(); // if not called, then the result of "valid replays" is incorrect.
 
+    assert(WSTR::Replay::getCount() == 0 && WSTR::Replay::getCountValidity() == 0);
 
     ui->tableWidget->setEnabled(false);
+    ui->progressBar->setValue(0);
 
     auto&& [vecReplays, isVecReplays] = createVectorWotReplays(listFiles);
 
@@ -381,12 +380,15 @@ void MainWindow::on_runScan_clicked()
         settings.logs.pushAndFlash("    auto&& [vecReplays, isVecReplays] = createVectorWotReplays(listFiles);\
                                    if(!isVecReplays) == false");
         toThreadStatusBar("Неизвестная Ошибка!", ui->statusBar);
+
+        clearTable(ui->tableWidget);
         return;
     }
 
-    replaysToTable(*ui->tableWidget, vecReplays);
+    ui->progressBar->setValue(50);
+    replaysToTableThreads(*ui->tableWidget, vecReplays);
 
-    //ui->tableWidget->sortByColumn(0, Qt::SortOrder::AscendingOrder);
+    ui->progressBar->setValue(100);
     toThreadStatusBar("Обновлено!", ui->statusBar);
     ui->tableWidget->setEnabled(true);
 
@@ -397,6 +399,12 @@ void MainWindow::on_runScan_clicked()
 void MainWindow::on_checkBox_stateChanged(int arg1)
 {
 
+
+}
+
+
+void MainWindow::on_tableWidget_itemDoubleClicked(QTableWidgetItem *item)
+{
 
 }
 

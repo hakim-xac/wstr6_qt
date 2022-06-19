@@ -129,6 +129,7 @@ public:             // PUBLIC FUNCTIONS
     static size_t getCount();
     static size_t getCountValidity();
     static void clearCounts();
+
 public:
 
 
