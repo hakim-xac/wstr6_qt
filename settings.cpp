@@ -33,7 +33,7 @@ Settings::~Settings()
 /// \param buffer
 /// \return
 ///
-bool Settings::saveToFile(std::stringstream& buffer) const
+bool Settings::saveToFile(std::stringstream& buffer)
 {
     std::ofstream fs(WSTR::Settings::settingFileName().data());
     if(!fs.is_open()) return false;
@@ -246,7 +246,7 @@ const std::string Settings::settingFileName()
 /// \brief Settings::save
 /// \return
 ///
-bool Settings::save() const
+bool Settings::save()
 {
     if(bd_.empty()) return false;
     std::stringstream ss;

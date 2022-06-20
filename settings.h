@@ -111,62 +111,6 @@ private:            // PRIVATE VARIABLES
     static inline std::map<const std::string, std::string> pathsList_{};
 
 
-private:            // PRIVATE FUNCTIONS
-    ///
-    /// \brief saveToFile
-    /// \param in
-    /// \return
-    ///
-    bool saveToFile(std::stringstream& buffer) const;
-
-    ///
-    /// \brief parse
-    /// \param str
-    /// \return
-    ///
-    std::pair<std::pair<std::string, std::string>, bool> parseLine(const std::string& str);
-
-    ///
-    /// \brief parse
-    /// \param configBuffer
-    /// \return
-    ///
-    bool parse(const std::vector<std::string>& configBuffer);
-
-    ///
-    /// \brief checkValue
-    /// \param key
-    /// \param value
-    /// \param sb
-    /// \return
-    ///
-    template <typename KeyType, typename ValueType>
-    bool checkValue(KeyType&& key, ValueType&& value, WSTR::SelectBase sb = WSTR::SelectBase::General);
-
-    ///
-    /// \brief selectBase
-    /// \param sb
-    /// \return
-    ///
-    std::map<const std::string, std::string>* selectBase(WSTR::SelectBase sb = WSTR::SelectBase::General);
-
-    ///
-    /// \brief checkHeaderItem
-    /// \param key
-    /// \param value
-    /// \return
-    ///
-    bool checkHeaderItem(std::string_view key, std::string_view value);
-
-    ///
-    /// \brief checkIsHeaderValue
-    /// \param value
-    /// \return
-    ///
-    bool checkIsHeaderValue(std::string_view value);
-
-
-
 private:            // PRIVATE STATIC FUNCTIONS
 
 
@@ -183,6 +127,61 @@ private:            // PRIVATE STATIC FUNCTIONS
     ///
     static inline const std::string settingFileName();
 
+    ///
+    /// \brief saveToFile
+    /// \param in
+    /// \return
+    ///
+    static bool saveToFile(std::stringstream& buffer);
+
+    ///
+    /// \brief checkIsHeaderValue
+    /// \param value
+    /// \return
+    ///
+    static bool checkIsHeaderValue(std::string_view value);
+
+    ///
+    /// \brief checkHeaderItem
+    /// \param key
+    /// \param value
+    /// \return
+    ///
+    static bool checkHeaderItem(std::string_view key, std::string_view value);
+
+    ///
+    /// \brief selectBase
+    /// \param sb
+    /// \return
+    ///
+    static std::map<const std::string, std::string>* selectBase(WSTR::SelectBase sb = WSTR::SelectBase::General);
+
+private:            // PRIVATE FUNCTIONS
+
+    ///
+    /// \brief parse
+    /// \param str
+    /// \return
+    ///
+    static std::pair<std::pair<std::string, std::string>, bool> parseLine(const std::string& str);
+
+    ///
+    /// \brief parse
+    /// \param configBuffer
+    /// \return
+    ///
+    static bool parse(const std::vector<std::string>& configBuffer);
+
+    ///
+    /// \brief checkValue
+    /// \param key
+    /// \param value
+    /// \param sb
+    /// \return
+    ///
+    template <typename KeyType, typename ValueType>
+    static bool checkValue(KeyType&& key, ValueType&& value, WSTR::SelectBase sb = WSTR::SelectBase::General);
+
 
 public:             // PUBLIC FUNCTIONS
 
@@ -194,13 +193,13 @@ public:             // PUBLIC FUNCTIONS
     /// \brief save
     /// \return
     ///
-    bool save() const;
+    static bool save();
 
     ///
     /// \brief load
     /// \return
     ///
-    bool load();
+    static bool load();
 
     ///
     /// \brief getValue
@@ -209,7 +208,7 @@ public:             // PUBLIC FUNCTIONS
     /// \return
     ///
     template <typename Type = std::string>
-    std::pair<std::decay_t<Type>, bool>
+    static std::pair<std::decay_t<Type>, bool>
     getValue(const std::string& key, WSTR::SelectBase sb = WSTR::SelectBase::General);
 
     ///
@@ -219,7 +218,7 @@ public:             // PUBLIC FUNCTIONS
     /// \param sb
     ///
     template <typename KeyType = std::string, typename ValueType = std::string>
-    bool
+    static bool
     setValue(KeyType&& key, ValueType&& value, WSTR::SelectBase sb = WSTR::SelectBase::General);
 
     ///
@@ -233,7 +232,7 @@ public:             // PUBLIC FUNCTIONS
     /// \param bufer
     /// \param list
     ///
-    void PathFromQComboBoxToPathsBufer(const QComboBox& list);
+    static void PathFromQComboBoxToPathsBufer(const QComboBox& list);
 
     ///
     /// \brief getVersionApp
@@ -263,7 +262,7 @@ public:             // PUBLIC FUNCTIONS
     /// \brief getCountHeaderList
     /// \return
     ///
-    size_t getCountHeaderList();
+    static size_t getCountHeaderList();
 
 };
 
