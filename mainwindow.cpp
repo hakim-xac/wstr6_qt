@@ -311,7 +311,7 @@ void MainWindow::on_pushButton_clicked()
     settings.setValue("currentPathIndex", std::to_string(ui->paths->currentIndex()));
 
     settings.PathFromQComboBoxToPathsBufer(*ui->paths);
-    settings.save();
+    //settings.save();
 
     clearTable(ui->tableWidget);
 
@@ -328,7 +328,7 @@ void MainWindow::on_pushButton_clicked()
 void MainWindow::on_paths_activated(int index)
 {
     settings.setValue("currentPathIndex", std::to_string(index));
-    settings.save();
+    //settings.save();
     clearTable(ui->tableWidget);
 }
 
@@ -403,7 +403,7 @@ void MainWindow::on_runScan_clicked()
 
     if(!isVecReplays) {
         WSTR::Logs::pushAndFlash("    auto&& [vecReplays, isVecReplays] = createVectorWotReplays(listFiles);\
-                                   if(!isVecReplays) == false");
+                                   if(!isVecReplays) == false", WSTR::AppType::Debug);
         toThreadStatusBar("Неизвестная Ошибка!", ui->statusBar);
 
         clearTable(ui->tableWidget);
@@ -412,6 +412,17 @@ void MainWindow::on_runScan_clicked()
 
     ui->progressBar->setValue(50);
     replaysToTableThreads(*ui->tableWidget, vecReplays);
+    ui->progressBar->setValue(75);
+
+    auto&& [activeColumn, isActiveColumn] = WSTR::Settings::getValue<size_t>("activeColumn");
+    auto&& [typeSortColumns, isTypeSortColumns] = WSTR::Settings::getValue<bool>("typeSortColumns");
+
+    Qt::SortOrder typeSort{ Qt::SortOrder::AscendingOrder };
+    if(isTypeSortColumns && typeSortColumns) typeSort = Qt::SortOrder::DescendingOrder;
+    // sort by index or zero
+    if(isActiveColumn) ui->tableWidget->sortByColumn(activeColumn, typeSort);
+    else ui->tableWidget->sortByColumn(0, typeSort);
+
 
     ui->progressBar->setValue(100);
     toThreadStatusBar("Обновлено!", ui->statusBar);
@@ -435,7 +446,34 @@ void MainWindow::on_tableWidget_itemDoubleClicked(QTableWidgetItem *item)
 
 void MainWindow::headerClicked(int index)
 {
-    ui->tableWidget->sortByColumn(index, Qt::SortOrder::AscendingOrder);
+    auto&& [typeSortColumns, isTypeSortColumns] = WSTR::Settings::getValue<bool>("typeSortColumns");
+
+    Qt::SortOrder typeSort{ Qt::SortOrder::DescendingOrder };
+    if(isTypeSortColumns && typeSortColumns) typeSort = Qt::SortOrder::AscendingOrder;
+
+    WSTR::Settings::setValue("typeSortColumns", std::to_string(!typeSortColumns));
+
+    auto&& [activeColumn, isActiveColumn] = WSTR::Settings::getValue<size_t>("activeColumn");
+    if(!isActiveColumn) {
+
+        WSTR::Logs::pushAndFlash("auto&& [activeColumn, isActiveColumn] = WSTR::Settings::getValue<int>(\"activeColumn\");\
+                                 if(!isActiveColumn) == false", WSTR::AppType::Debug);
+
+        ui->tableWidget->sortByColumn(0, typeSort);
+        return;
+    }
+
+    if(!WSTR::Settings::checkIsRange(0ull, WSTR::Settings::getCountHeaderList(), activeColumn)){
+
+        WSTR::Logs::pushAndFlash("if(!WSTR::Settings::checkIsRange(0, WSTR::Settings::getCountHeaderList(), activeColumn)) == false", WSTR::AppType::Debug);
+        ui->tableWidget->sortByColumn(0, typeSort);
+        return;
+    }
+
+    ui->tableWidget->sortByColumn(index, typeSort);
+
+    WSTR::Settings::setValue("activeColumn", std::to_string(index));
+
 }
 
 
