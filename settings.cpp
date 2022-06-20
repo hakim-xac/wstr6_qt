@@ -15,11 +15,9 @@ namespace WSTR {
 /// \brief Settings::Settings
 ///
 Settings::Settings()
-    : default_()
-    , countOfPaths_()
-    , bd_(default_.bd_)
-    , pathsList_()
-    , headerList_(default_.header_) {}
+{
+
+}
 
 
 ///
@@ -37,7 +35,7 @@ Settings::~Settings()
 ///
 bool Settings::saveToFile(std::stringstream& buffer) const
 {
-    std::ofstream fs(settingFileName_.data());
+    std::ofstream fs(WSTR::Settings::settingFileName().data());
     if(!fs.is_open()) return false;
     fs.clear();
     if(!(fs << buffer.str())){
@@ -92,7 +90,7 @@ bool Settings::parse(const std::vector<std::string> &configBuffer)
 
             if(!checkHeaderItem(key, value)){
                 headerList_.clear();
-                headerList_ = default_.header_;
+                headerList_ = WSTR::Settings::Default::header;
 
                 std::stringstream ss{ "if(!checkHeaderItem(key, value)) == false\n" };
                 ss << "key: " << key << " value: " << value << std::endl;
@@ -211,8 +209,8 @@ void Settings::PathFromQComboBoxToPathsBufer(const QComboBox& list)
 /// \brief Settings::getVersionApp
 /// \return
 ///
-std::string_view Settings::getVersionApp(){
-    return versionApplication_;
+const std::string Settings::getVersionApp(){
+    return "6.0.0.0";
 }
 
 ///
@@ -231,7 +229,16 @@ size_t Settings::getCountHeaderList()
 ///
 bool Settings::checkIsHeaderValue(std::string_view value)
 {
-    return std::find(std::begin(default_.headerArray_), std::end(default_.headerArray_), value) != std::end(default_.headerArray_);
+    return std::find(std::begin(WSTR::Settings::Default::headerArray), std::end(WSTR::Settings::Default::headerArray), value) != std::end(WSTR::Settings::Default::headerArray);
+}
+
+///
+/// \brief Settings::settingFileName
+/// \return
+///
+const std::string Settings::settingFileName()
+{
+    return "./settings.dat";
 }
 
 
@@ -267,10 +274,11 @@ bool Settings::load()
 
     WSTR::Logs::pushAndFlash("Start Settings.load()", WSTR::AppType::Debug);
 
-    std::ifstream fs(settingFileName_.data());
+    std::ifstream fs(settingFileName());
+
     if(!fs.is_open()){
         std::stringstream ss{"Can`t open settings file: "};
-        ss << settingFileName_.data();
+        ss << settingFileName();
         WSTR::Logs::pushAndFlash(ss.str(), WSTR::AppType::Debug);
         return false;
     }
@@ -285,6 +293,7 @@ bool Settings::load()
         return false;
     }
     if(!parse(tmpVecConfig)) {
+        WSTR::Logs::pushAndFlash("if(!parse(tmpVecConfig)) == true", WSTR::AppType::Debug);
         fs.close();
         return false;
     }
@@ -298,9 +307,9 @@ bool Settings::load()
 /// \brief Settings::getDefaultPath
 /// \return
 ///
-QString Settings::getDefaultPath() const
+const QString Settings::getDefaultPath()
 {
-    return default_.defaultPath_;
+    return QCoreApplication::applicationDirPath();
 }
 
 

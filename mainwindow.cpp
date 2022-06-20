@@ -29,6 +29,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     variableInitialization();
 
+    connect(ui->tableWidget->horizontalHeader(), SIGNAL(sectionClicked(int)), this, SLOT(headerClicked(int)));
+
 }
 
 ///
@@ -53,7 +55,12 @@ void MainWindow::variableInitialization()
     ui->tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->progressBar->setValue(0);
 
-    initPathsView();
+    if(!initPathsView()){
+        toThreadStatusBar("Не удалось Загрузить данные из файла настроек!", ui->statusBar, 5);
+        WSTR::Logs::pushAndFlash("if(!initPathsView()) == true", WSTR::AppType::Debug);
+        WSTR::Logs::pushAndFlash("break MainWindow::variableInitialization()", WSTR::AppType::Debug);
+        return;
+    }
 
     toThreadStatusBar("ХАЙ!", ui->statusBar, 5);
 
@@ -62,9 +69,9 @@ void MainWindow::variableInitialization()
 
 ///
 /// \brief MainWindow::initPathsView
-/// \param keyInMap_CountPaths
+/// \return
 ///
-void MainWindow::initPathsView()
+bool MainWindow::initPathsView()
 {
     using namespace std::string_literals;
     WSTR::Logs::pushAndFlash("start MainWindow::initPathsView()", WSTR::AppType::Debug);
@@ -78,13 +85,22 @@ void MainWindow::initPathsView()
         auto&& [countPaths_i, isCountPaths_s] = settings.toType<int>(countPaths_s);
         if(!isCountPaths_s){
 
-            std::stringstream ss{"auto [countPaths_i, isCountPaths_s] = toType<int>(countPaths_s);\n"};
+            std::stringstream ss;
+            ss << "auto [countPaths_i, isCountPaths_s] = toType<int>(countPaths_s);\n";
             ss << "isCountPaths_s == false\n";
             ss << "countPaths_i: " << countPaths_i << " isCountPaths_s: " << isCountPaths_s << "\n";
             WSTR::Logs::pushAndFlash(ss.str(), WSTR::AppType::Debug);
-            return;
+            return false;
         }
         WSTR::Logs::pushAndFlash("isCountPaths_s == true", WSTR::AppType::Debug);
+
+        if(!WSTR::Settings::checkIsRange(0, 50, countPaths_i))  {
+            std::stringstream ss;
+            ss << "if(!WSTR::Settings::checkIsRange(0, 50, countPaths_i)) == false\n";
+            ss << "countPaths_i: " << countPaths_i << "\n";
+            WSTR::Logs::pushAndFlash(ss.str(), WSTR::AppType::Debug);
+            return false;
+        }
 
         for(size_t i{}; i < countPaths_i; ++i){
             auto&& [path, isPath] = settings.getValue("path_"s+std::to_string(i), WSTR::SelectBase::Paths);
@@ -107,18 +123,24 @@ void MainWindow::initPathsView()
 
             settings.save();
             }
-            return;
+            return true;
         }
         WSTR::Logs::pushAndFlash("paths.size() == 0", WSTR::AppType::Debug);
     }
-    WSTR::Logs::pushAndFlash("isCountPath == false", WSTR::AppType::Debug);
+    std::stringstream ss;
+    ss << "isCountPath == false\n";
+    ss << "countPaths_s == " << countPaths_s << "\n";
+    WSTR::Logs::pushAndFlash(ss.str(), WSTR::AppType::Debug);
 
-    settings.setValue("path_0", settings.getDefaultPath().toStdString(), WSTR::SelectBase::Paths);
+    settings.setValue("path_0", WSTR::Settings::getDefaultPath().toStdString(), WSTR::SelectBase::Paths);
+    settings.setValue("countOfPaths", "1", WSTR::SelectBase::General);
+
     settings.save();
-    ui->paths->addItem(settings.getDefaultPath());
+    ui->paths->addItem(WSTR::Settings::getDefaultPath());
 
     WSTR::Logs::pushAndFlash("end MainWindow::initPathsView()", WSTR::AppType::Debug);
 
+    return false;
 }
 
 ///
@@ -408,6 +430,12 @@ void MainWindow::on_checkBox_stateChanged(int arg1)
 
 void MainWindow::on_tableWidget_itemDoubleClicked(QTableWidgetItem *item)
 {
-
+    std::cout << ".column: " << item->column() << " row: " << item->row() << std::endl;
 }
+
+void MainWindow::headerClicked(int index)
+{
+    ui->tableWidget->sortByColumn(index, Qt::SortOrder::AscendingOrder);
+}
+
 

@@ -40,6 +40,8 @@ private slots:
 
     void on_tableWidget_itemDoubleClicked(QTableWidgetItem *item);
 
+    void headerClicked(int index);
+
 private:
     ///
     /// \brief toQString
@@ -63,9 +65,14 @@ private:
 
     ///
     /// \brief initPathsView
+    /// \return
     ///
-    void initPathsView();
+    bool initPathsView();
 
+    ///
+    /// \brief clearTable
+    /// \param table
+    ///
     void clearTable(QTableWidget* table);
 
     ///
@@ -149,10 +156,6 @@ private:
 
     uint countThreads_;
 
-
-private:    //  static variables
-
-    static inline std::mutex mxProgressBar_ {};
 };
 
 
@@ -184,7 +187,8 @@ void MainWindow
 ::toStatusBar(Type&& str){
     WSTR::Logs::push(str);
 
-    std::stringstream ss{"Error transform!\n"};
+    std::stringstream ss;
+    ss << "Error transform!\n";
     ss << "String: " << str;
 
     auto&& [new_str, isTransform] = toQString(std::forward<Type>(str));
@@ -209,7 +213,7 @@ QFileInfoList MainWindow
     QDir dir{ QString(std::forward<TypeDirName>(pathDir)) };
     dir.setFilter(QDir::Files | QDir::NoDotAndDotDot | QDir::NoSymLinks);
     QStringList filters(std::forward<TypeFilter>(filter));
-     dir.setNameFilters(filters);
+    dir.setNameFilters(filters);
 
     dir.setSorting(QDir::Size | QDir::Reversed);
     return dir.entryInfoList();

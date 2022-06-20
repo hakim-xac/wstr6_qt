@@ -21,39 +21,18 @@ class Settings{
         ///
         ///
         ///
-        const QString defaultPath_{ QCoreApplication::applicationDirPath() };
-
-        ///
-        ///
-        ///
-        static inline const std::map<const std::string, std::string> bd_{
+        static inline const std::map<const std::string, std::string> bd{
             { "countOfPaths", "0" }
             , { "currentPathIndex", "0" }
             , { "waitUpdateStatusBar_s", "1" }
+            , { "activeColumn", "0" }
+            , { "typeSortColumns", "0" }
         };
 
         ///
         ///
         ///
-        static inline const std::map<const std::string, std::string> header_{
-            { "header_1", "id" }
-            , { "header_2", "size" }
-            , { "header_3", "validity" }
-            , { "header_4", "hasMods" }
-            , { "header_5", "respawn" }
-            , { "header_6", "mapName" }
-            , { "header_7", "mapDisplayName" }
-            , { "header_8", "playerName" }
-            , { "header_9", "playerVehicle" }
-            , { "header_10", "clientVersionFromXml" }
-            , { "header_11", "playerID" }
-            , { "header_12", "battleType" }
-        };
-
-        ///
-        ///
-        ///
-        static constexpr std::array<std::string_view, 17> headerArray_{
+        static constexpr std::array<std::string_view, 17> headerArray{
             "id"
             , "size"
             , "validity"
@@ -67,13 +46,29 @@ class Settings{
             , "userName"
             , "mapDisplayNameTestName"
             , "replayName"
-            , "clientVersionFromXml"
             , "playerID"
+            , "clientVersionFromXml"
             , "arenaCreateTime"
             , "battleType"
         };
 
-
+        ///
+        ///
+        ///
+        static inline const std::map<const std::string, std::string> header{
+            { "header_1", "id" }
+            , { "header_2", "size" }
+            , { "header_3", "validity" }
+            , { "header_4", "hasMods" }
+            , { "header_5", "respawn" }
+            , { "header_6", "mapName" }
+            , { "header_7", "mapDisplayName" }
+            , { "header_8", "playerName" }
+            , { "header_9", "playerVehicle" }
+            , { "header_10", "playerID" }
+            , { "header_11", "clientVersionFromXml" }
+            , { "header_12", "battleType" }
+        };
 
     };
 
@@ -85,17 +80,10 @@ class Settings{
 
 private:            // PRIVATE VARIABLES
 
-
-    ///
-    /// \brief default_
-    ///
-    Default default_;
-
-
     ///
     ///
     ///
-    size_t countOfPaths_;
+    static inline size_t countOfPaths_{};
 
     ///
     /// \brief minimumInSize_t_
@@ -110,38 +98,18 @@ private:            // PRIVATE VARIABLES
     ///
     ///
     ///
-    std::map<const std::string, std::string> bd_;
-
-    ///
-    /// \brief pathsList_
-    ///
-    std::map<const std::string, std::string> pathsList_;
+    static inline std::map<const std::string, std::string> bd_{ WSTR::Settings::Default::bd };
 
     ///
     /// \brief headerList_
     ///
-    std::map<const std::string, std::string> headerList_;
-
-
-
-private:            // PRIVATE STATIC VARIABLES AND FUNCTIONS
-
+    static inline std::map<const std::string, std::string> headerList_{ WSTR::Settings::Default::header };
 
     ///
+    /// \brief pathsList_
     ///
-    static constexpr std::string_view versionApplication_{ "6.0.0.0" };
+    static inline std::map<const std::string, std::string> pathsList_{};
 
-    ///
-    ///
-    ///
-    static constexpr std::string_view settingFileName_{ "./settings.dat" };
-
-    ///
-    /// \brief checkDirExists
-    /// \param pathDir
-    /// \return
-    ///
-    static bool checkDirExists(std::string_view pathDir);
 
 private:            // PRIVATE FUNCTIONS
     ///
@@ -198,6 +166,24 @@ private:            // PRIVATE FUNCTIONS
     bool checkIsHeaderValue(std::string_view value);
 
 
+
+private:            // PRIVATE STATIC FUNCTIONS
+
+
+    ///
+    /// \brief checkDirExists
+    /// \param pathDir
+    /// \return
+    ///
+    static bool checkDirExists(std::string_view pathDir);
+
+    ///
+    /// \brief settingFileName
+    /// \return
+    ///
+    static inline const std::string settingFileName();
+
+
 public:             // PUBLIC FUNCTIONS
 
     Settings();
@@ -240,7 +226,7 @@ public:             // PUBLIC FUNCTIONS
     /// \brief getDefaultPath
     /// \return
     ///
-    QString getDefaultPath() const;
+    static const QString getDefaultPath();
 
     ///
     /// \brief qListToSSBufer
@@ -253,7 +239,7 @@ public:             // PUBLIC FUNCTIONS
     /// \brief getVersionApp
     /// \return
     ///
-    std::string_view getVersionApp();
+    static const std::string getVersionApp();
 
     ///
     /// \brief toType
@@ -351,7 +337,8 @@ bool Settings::checkValue(KeyType&& key, ValueType&& value, SelectBase sb)
     auto&& [newValue, isGet] = getValue(std::forward<KeyType>(key), sb);
 
     if(!isGet){
-        std::stringstream ss{ "bool Settings::checkValue(KeyType&& key, ValueType&& value, SelectBase sb)\n" };
+        std::stringstream ss;
+        ss << "bool Settings::checkValue(KeyType&& key, ValueType&& value, SelectBase sb)\n";
         ss << "auto&& [newValue, isGet] = getValue(key, sb);\n";
         ss << "isGet == FALSE\n";
 
@@ -359,7 +346,8 @@ bool Settings::checkValue(KeyType&& key, ValueType&& value, SelectBase sb)
         return false;
     }
     if(newValue != std::forward<ValueType>(value)) {
-        std::stringstream ss{ "bool Settings::checkValue(KeyType&& key, ValueType&& value, SelectBase sb)\n" };
+        std::stringstream ss;
+        ss << "bool Settings::checkValue(KeyType&& key, ValueType&& value, SelectBase sb)\n";
         ss << "auto&& [newValue, isGet] = getValue(key, sb);\n";
         ss << "(newValue == value) == FALSE \n";
 
