@@ -16,40 +16,41 @@ namespace WSTR {
 
 class Settings{
 
+public:
+    ///
+    /// \brief getFieldName
+    /// \param fn
+    /// \return
+    ///
+    static const std::string getFieldName(WSTR::FieldNames fn);
+
+
+private:
     struct Default{
+
 
         ///
         ///
         ///
-        static inline const std::map<const std::string, std::string> bd{
-            { "countOfPaths", "0" }
-            , { "currentPathIndex", "0" }
-            , { "waitUpdateStatusBar_s", "1" }
-            , { "activeColumn", "0" }
-            , { "typeSortColumns", "0" }
+        static inline std::map<WSTR::FieldNames, const std::string> fieldNames{
+
+            { WSTR::FieldNames::ActiveColumn, "activeColumn" }
+            , { WSTR::FieldNames::TypeSortColumns, "typeSortColumns" }
+            , { WSTR::FieldNames::CurrentPathIndex, "currentPathIndex" }
+            , { WSTR::FieldNames::CountOfPaths, "countOfPaths" }
+            , { WSTR::FieldNames::WaitUpdateStatusBar_s, "waitUpdateStatusBar_s" }
+
         };
 
         ///
         ///
         ///
-        static constexpr std::array<std::string_view, 17> headerArray{
-            "id"
-            , "size"
-            , "validity"
-            , "hasMods"
-            , "respawn"
-            , "duration"
-            , "winnerTeam"
-            , "dateTime"
-            , "vehicle"
-            , "mapName"
-            , "userName"
-            , "mapDisplayNameTestName"
-            , "replayName"
-            , "playerID"
-            , "clientVersionFromXml"
-            , "arenaCreateTime"
-            , "battleType"
+        static inline const std::map<const std::string, std::string> bd{
+            { WSTR::Settings::getFieldName(WSTR::FieldNames::CountOfPaths), "0" }
+            , { WSTR::Settings::getFieldName(WSTR::FieldNames::CurrentPathIndex), "0" }
+            , { WSTR::Settings::getFieldName(WSTR::FieldNames::WaitUpdateStatusBar_s), "2" }
+            , { WSTR::Settings::getFieldName(WSTR::FieldNames::ActiveColumn), "0" }
+            , { WSTR::Settings::getFieldName(WSTR::FieldNames::TypeSortColumns), "0" }
         };
 
         ///
@@ -70,6 +71,29 @@ class Settings{
             , { "header_12", "battleType" }
         };
 
+        ///
+        ///
+        ///
+        static constexpr std::array<std::string_view, 17> headerArray{
+            "id"
+            , "size"
+            , "validity"
+            , "hasMods"
+            , "respawn"
+            , "duration"
+            , "winnerTeam"
+            , "dateTime"
+            , "playerVehicle"
+            , "mapName"
+            , "playerName"
+            , "mapDisplayName"
+            , "replayName"
+            , "playerID"
+            , "clientVersionFromXml"
+            , "arenaCreateTime"
+            , "battleType"
+        };
+
     };
 
 
@@ -83,15 +107,10 @@ private:            // PRIVATE VARIABLES
     ///
     ///
     ///
-    static inline size_t countOfPaths_{};
-
-    ///
-    /// \brief minimumInSize_t_
-    ///
     static constexpr size_t minimumInSize_t{};
 
     ///
-    /// \brief maximumInSize_t_
+    ///
     ///
     static constexpr size_t maximumInSize_t_{ 100 };
 
@@ -101,12 +120,12 @@ private:            // PRIVATE VARIABLES
     static inline std::map<const std::string, std::string> bd_{ WSTR::Settings::Default::bd };
 
     ///
-    /// \brief headerList_
+    ///
     ///
     static inline std::map<const std::string, std::string> headerList_{ WSTR::Settings::Default::header };
 
     ///
-    /// \brief pathsList_
+    ///
     ///
     static inline std::map<const std::string, std::string> pathsList_{};
 
@@ -202,6 +221,11 @@ public:             // PUBLIC FUNCTIONS
     static bool load();
 
     ///
+    /// \brief loadFromDefault
+    ///
+    static void loadFromDefault();
+
+    ///
     /// \brief getValue
     /// \param key
     /// \param sb
@@ -281,6 +305,7 @@ std::pair<std::decay_t<Type>, bool> Settings
     using type = std::decay_t<Type>;
 
     auto base{ selectBase(sb) };
+
     if(!base) return { type(), false };
     try{
         if constexpr(std::is_same_v<type, std::string>){

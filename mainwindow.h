@@ -52,13 +52,6 @@ private:
     static std::pair< QString, bool > toQString(Type&& str);
 
     ///
-    /// \brief toStatusBar
-    /// \param in
-    ///
-    template<typename Type>
-    void toStatusBar(Type&& in);
-
-    ///
     /// \brief variableInitialization
     ///
     void variableInitialization();
@@ -150,10 +143,8 @@ private:
     Ui::MainWindow *ui;
 
     ///
-    /// \brief settings
+    /// \brief countThreads_
     ///
-    WSTR::Settings settings;
-
     uint countThreads_;
 
 };
@@ -176,28 +167,6 @@ std::pair< QString, bool > MainWindow
         return { QString(), false };
     }
     return { QString::fromStdString(ss.str()), true };
-}
-
-///
-/// \brief MainWindow::toStatusBar
-/// \param str
-///
-template <typename Type>
-void MainWindow
-::toStatusBar(Type&& str){
-    WSTR::Logs::push(str);
-
-    std::stringstream ss;
-    ss << "Error transform!\n";
-    ss << "String: " << str;
-
-    auto&& [new_str, isTransform] = toQString(std::forward<Type>(str));
-    if(!isTransform){
-        WSTR::Logs::pushAndFlash(ss.str(), WSTR::AppType::Debug);
-        return;
-    }
-    ui->statusBar->setText(std::move(new_str));
-
 }
 
 ///
@@ -287,11 +256,12 @@ void MainWindow::setCurrentItemThreads(TypeWidget &table, Iter first, Iter begin
 template <typename Type>
 bool MainWindow::setHeaderInTable(QTableWidget &table)
 {
-    std::map<std::string, size_t> mp;
-    for(size_t i{ 1 }, ie{ settings.getCountHeaderList() }; i <= ie; ++i){
+    using settings = WSTR::Settings;
+
+    for(size_t i{ 1 }, ie{ settings::getCountHeaderList() }; i <= ie; ++i){
 
         std::string headerName{ "header_" + std::to_string(i) };
-        auto&& [value, isValue] = settings.getValue<std::string>(headerName, WSTR::SelectBase::Headers);
+        auto&& [value, isValue] = settings::getValue<std::string>(headerName, WSTR::SelectBase::Headers);
 
         if(isValue){
             QTableWidgetItem* elem{ new QTableWidgetItem ( QString::fromStdString(value) ) };
@@ -300,8 +270,6 @@ bool MainWindow::setHeaderInTable(QTableWidget &table)
             elem->setTextAlignment(Qt::AlignHCenter | Qt::AlignTop);
 
             table.setHorizontalHeaderItem(i-1, elem );
-
-            mp.insert( {value, static_cast<size_t>(i) } );
         }
         else{
             table.setHorizontalHeaderItem(i-1, new QTableWidgetItem(QString(i, '-')));
@@ -316,6 +284,10 @@ bool MainWindow::setHeaderInTable(QTableWidget &table)
 template <typename TypeWidget>
 bool MainWindow::replaysToTableThreads(TypeWidget& table, const std::vector<WSTR::Replay> &vec)
 {
+
+    using settings = WSTR::Settings;
+
+
     static_assert (std::is_same_v<TypeWidget, QTableWidget>, "static bool MainWindow::replaysToTableThreads(TypeWidget& table, const std::vector<WSTR::Replay> &vec)\
     (TypeWidget == QTableWidget) == false");
 
@@ -323,7 +295,7 @@ bool MainWindow::replaysToTableThreads(TypeWidget& table, const std::vector<WSTR
     table.clear();
 
     table.setRowCount(static_cast<int>(vec.size()));
-    table.setColumnCount(settings.getCountHeaderList());
+    table.setColumnCount(settings::getCountHeaderList());
 
     if(!setHeaderInTable(table)) return false;
 

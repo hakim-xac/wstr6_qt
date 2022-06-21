@@ -37,6 +37,14 @@ enum class BattleType{
     , Unknown
 };
 
+enum class FieldNames{
+    ActiveColumn
+    , TypeSortColumns
+    , CurrentPathIndex
+    , CountOfPaths
+    , WaitUpdateStatusBar_s
+};
+
 
 }
 

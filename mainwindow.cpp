@@ -19,13 +19,19 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , settings()
     , countThreads_(std::thread::hardware_concurrency())    
 {
+
+    using settings = WSTR::Settings;
+
     ui->setupUi(this);
     WSTR::Logs::pushAndFlash("MainWindow Initializated", WSTR::AppType::Debug);
 
-    settings.load();
+    if(!settings::load()){
+        settings::loadFromDefault();
+
+        toThreadStatusBar("Загрузка из файла конфигурации не удалась! Загружены данные по умолчанию!",ui->statusBar, 5);
+    }
 
     variableInitialization();
 
@@ -38,6 +44,7 @@ MainWindow::MainWindow(QWidget *parent)
 ///
 MainWindow::~MainWindow()
 {
+    WSTR::Settings::save();
     delete ui;
 }
 
@@ -46,7 +53,6 @@ MainWindow::~MainWindow()
 ///
 void MainWindow::variableInitialization()
 {
-    using namespace std::string_literals;
     WSTR::Logs::pushAndFlash("start MainWindow::variableInitialization()", WSTR::AppType::Debug);
 
     ui->tableWidget->verticalHeader()->hide();
@@ -74,15 +80,19 @@ void MainWindow::variableInitialization()
 bool MainWindow::initPathsView()
 {
     using namespace std::string_literals;
+
+    using settings = WSTR::Settings;
+    using fieldNames = WSTR::FieldNames;
+
     WSTR::Logs::pushAndFlash("start MainWindow::initPathsView()", WSTR::AppType::Debug);
 
-    auto&& [countPaths_s, isCountPath] = settings.getValue("countOfPaths"s);
+    auto&& [countPaths_s, isCountPath] = settings::getValue(settings::getFieldName(fieldNames::CountOfPaths));
     if(isCountPath){
 
         WSTR::Logs::pushAndFlash("isCountPath == true", WSTR::AppType::Debug);
 
         QStringList paths;
-        auto&& [countPaths_i, isCountPaths_s] = settings.toType<int>(countPaths_s);
+        auto&& [countPaths_i, isCountPaths_s] = settings::toType<int>(countPaths_s);
         if(!isCountPaths_s){
 
             std::stringstream ss;
@@ -94,7 +104,7 @@ bool MainWindow::initPathsView()
         }
         WSTR::Logs::pushAndFlash("isCountPaths_s == true", WSTR::AppType::Debug);
 
-        if(!WSTR::Settings::checkIsRange(0, 50, countPaths_i))  {
+        if(!settings::checkIsRange(0, 50, countPaths_i))  {
             std::stringstream ss;
             ss << "if(!WSTR::Settings::checkIsRange(0, 50, countPaths_i)) == false\n";
             ss << "countPaths_i: " << countPaths_i << "\n";
@@ -103,7 +113,7 @@ bool MainWindow::initPathsView()
         }
 
         for(size_t i{}; i < countPaths_i; ++i){
-            auto&& [path, isPath] = settings.getValue("path_"s+std::to_string(i), WSTR::SelectBase::Paths);
+            auto&& [path, isPath] = settings::getValue("path_"s+std::to_string(i), WSTR::SelectBase::Paths);
             if(!isPath) break;
             paths.append(QString::fromStdString(path));
         }
@@ -111,32 +121,34 @@ bool MainWindow::initPathsView()
         if(paths.size() > 0) {
             ui->paths->addItems(paths);
 
-            auto [currentPathIndex_s, isCurrentPathIndex] = settings.getValue("currentPathIndex"s);
+            auto [currentPathIndex_s, isCurrentPathIndex] = settings::getValue(settings::getFieldName(fieldNames::CurrentPathIndex));
             if(isCurrentPathIndex){
 
-            auto [currentIndex, isCurrentIndex] = settings.toType<int>(currentPathIndex_s);
+            auto [currentIndex, isCurrentIndex] = settings::toType<int>(currentPathIndex_s);
             ui->paths->setCurrentIndex(0);
 
-            if(isCurrentIndex && WSTR::Settings::checkIsRange(0, static_cast<int>(paths.size()) - 1, currentIndex)) {
+            if(isCurrentIndex && settings::checkIsRange(0, static_cast<int>(paths.size()) - 1, currentIndex)) {
                 ui->paths->setCurrentIndex(currentIndex);
             }
 
-            settings.save();
+            settings::save();
             }
             return true;
         }
         WSTR::Logs::pushAndFlash("paths.size() == 0", WSTR::AppType::Debug);
     }
+
+
     std::stringstream ss;
     ss << "isCountPath == false\n";
     ss << "countPaths_s == " << countPaths_s << "\n";
     WSTR::Logs::pushAndFlash(ss.str(), WSTR::AppType::Debug);
 
-    settings.setValue("path_0", WSTR::Settings::getDefaultPath().toStdString(), WSTR::SelectBase::Paths);
-    settings.setValue("countOfPaths", "1", WSTR::SelectBase::General);
+    settings::setValue("path_0", WSTR::Settings::getDefaultPath().toStdString(), WSTR::SelectBase::Paths);
+    settings::setValue(settings::getFieldName(fieldNames::CountOfPaths), "1", WSTR::SelectBase::General);
 
-    settings.save();
-    ui->paths->addItem(WSTR::Settings::getDefaultPath());
+    settings::save();
+    ui->paths->addItem(settings::getDefaultPath());
 
     WSTR::Logs::pushAndFlash("end MainWindow::initPathsView()", WSTR::AppType::Debug);
 
@@ -170,20 +182,23 @@ void MainWindow::clearTable(QTableWidget *table)
 ///
 void MainWindow::toThreadStatusBar(QString&& str, QLabel* const label, int waitSec)
 {
+    using time = std::chrono::high_resolution_clock;
+    using ms = std::chrono::milliseconds;
+    using settings = WSTR::Settings;
+    using fieldNames = WSTR::FieldNames;
+
         if(!label){
             WSTR::Logs::pushAndFlash("void MainWindow::toThreadStatusBar(QString&& str, QLabel* const label, int waitSec) \
     (label == nullptr) == true", WSTR::AppType::Debug);
             return;
         }
 
-        using time = std::chrono::high_resolution_clock;
-        using ms = std::chrono::milliseconds;
 
         static auto tm{ time::now() };
         static bool isRun{};
         auto now{ time::now() };
 
-        auto&& [waitUpdateStatusBar_s, isWait] = settings.getValue<size_t>("waitUpdateStatusBar_s");
+        auto&& [waitUpdateStatusBar_s, isWait] = settings::getValue<size_t>(WSTR::Settings::getFieldName(WSTR::FieldNames::WaitUpdateStatusBar_s));
         if(!isWait) waitUpdateStatusBar_s = 1;
         if((std::chrono::duration_cast<ms>(now - tm)).count() < waitUpdateStatusBar_s * 1000 && isRun) return;
 
@@ -288,6 +303,10 @@ void MainWindow::addToThread(TypeVecIter first, TypeVecIter begin, TypeVecIter e
 ///
 void MainWindow::on_pushButton_clicked()
 {
+
+    using settings = WSTR::Settings;
+    using fieldNames = WSTR::FieldNames;
+
     QString currentDir{ ui->paths->itemText(ui->paths->currentIndex()) };
 
     QString dir{ QFileDialog::getExistingDirectory(this, tr("Open Directory"),
@@ -300,18 +319,17 @@ void MainWindow::on_pushButton_clicked()
 
     if(findIndex != -1){
         ui->paths->setCurrentIndex(findIndex);
-        toStatusBar(ui->paths->itemText(findIndex).toStdString());
     }
     else{
         ui->paths->addItem(dir);
         ui->paths->setCurrentIndex(ui->paths->count()-1);
     }
 
-    settings.setValue("countOfPaths", std::to_string(ui->paths->count()));
-    settings.setValue("currentPathIndex", std::to_string(ui->paths->currentIndex()));
+    settings::setValue(settings::getFieldName(fieldNames::CountOfPaths), std::to_string(ui->paths->count()));
+    settings::setValue(settings::getFieldName(fieldNames::CurrentPathIndex), std::to_string(ui->paths->currentIndex()));
 
-    settings.PathFromQComboBoxToPathsBufer(*ui->paths);
-    //settings.save();
+    settings::PathFromQComboBoxToPathsBufer(*ui->paths);
+    settings::save();
 
     clearTable(ui->tableWidget);
 
@@ -327,7 +345,10 @@ void MainWindow::on_pushButton_clicked()
 ///
 void MainWindow::on_paths_activated(int index)
 {
-    settings.setValue("currentPathIndex", std::to_string(index));
+    using settings = WSTR::Settings;
+    using fieldNames = WSTR::FieldNames;
+
+    settings::setValue(settings::getFieldName(fieldNames::CurrentPathIndex), std::to_string(index));
     //settings.save();
     clearTable(ui->tableWidget);
 }
@@ -380,6 +401,11 @@ void MainWindow::on_checkBox_clicked()
 ///
 void MainWindow::on_runScan_clicked()
 {
+
+    using replay = WSTR::Replay;
+    using settings = WSTR::Settings;
+    using fildNames = WSTR::FieldNames;
+
     clearTable(ui->tableWidget);
 
     QString filters{ "*.wotreplay" };
@@ -392,9 +418,9 @@ void MainWindow::on_runScan_clicked()
     }
 
     //*  BE SURE TO CALL !!!  *///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    WSTR::Replay::clearCounts(); // if not called, then the result of "valid replays" is incorrect.
+    replay::clearCounts(); // if not called, then the result of "valid replays" is incorrect.
 
-    assert(WSTR::Replay::getCount() == 0 && WSTR::Replay::getCountValidity() == 0);
+    assert(replay::getCount() == 0 && replay::getCountValidity() == 0);
 
     ui->tableWidget->setEnabled(false);
     ui->progressBar->setValue(0);
@@ -414,8 +440,9 @@ void MainWindow::on_runScan_clicked()
     replaysToTableThreads(*ui->tableWidget, vecReplays);
     ui->progressBar->setValue(75);
 
-    auto&& [activeColumn, isActiveColumn] = WSTR::Settings::getValue<size_t>("activeColumn");
-    auto&& [typeSortColumns, isTypeSortColumns] = WSTR::Settings::getValue<bool>("typeSortColumns");
+
+    auto&& [activeColumn, isActiveColumn] = settings::getValue<size_t>(settings::getFieldName(fildNames::ActiveColumn));
+    auto&& [typeSortColumns, isTypeSortColumns] = settings::getValue<bool>(settings::getFieldName(fildNames::TypeSortColumns));
 
     Qt::SortOrder typeSort{ Qt::SortOrder::AscendingOrder };
     if(isTypeSortColumns && typeSortColumns) typeSort = Qt::SortOrder::DescendingOrder;
@@ -446,33 +473,36 @@ void MainWindow::on_tableWidget_itemDoubleClicked(QTableWidgetItem *item)
 
 void MainWindow::headerClicked(int index)
 {
-    auto&& [typeSortColumns, isTypeSortColumns] = WSTR::Settings::getValue<bool>("typeSortColumns");
+    using settings = WSTR::Settings;
+    using fildNames = WSTR::FieldNames;
+
+    auto&& [typeSortColumns, isTypeSortColumns] = settings::getValue<bool>(settings::getFieldName(fildNames::TypeSortColumns));
 
     Qt::SortOrder typeSort{ Qt::SortOrder::DescendingOrder };
     if(isTypeSortColumns && typeSortColumns) typeSort = Qt::SortOrder::AscendingOrder;
 
-    WSTR::Settings::setValue("typeSortColumns", std::to_string(!typeSortColumns));
+    settings::setValue("typeSortColumns", std::to_string(!typeSortColumns));
 
-    auto&& [activeColumn, isActiveColumn] = WSTR::Settings::getValue<size_t>("activeColumn");
+    auto&& [activeColumn, isActiveColumn] = settings::getValue<size_t>(settings::getFieldName(fildNames::ActiveColumn));
     if(!isActiveColumn) {
 
-        WSTR::Logs::pushAndFlash("auto&& [activeColumn, isActiveColumn] = WSTR::Settings::getValue<int>(\"activeColumn\");\
+        WSTR::Logs::pushAndFlash("auto&& [activeColumn, isActiveColumn] = settings::getValue<size_t>(settings::getFieldName(fildNames::ActiveColumn));\
                                  if(!isActiveColumn) == false", WSTR::AppType::Debug);
 
         ui->tableWidget->sortByColumn(0, typeSort);
         return;
     }
 
-    if(!WSTR::Settings::checkIsRange(0ull, WSTR::Settings::getCountHeaderList(), activeColumn)){
+    if(!settings::checkIsRange(0ull, settings::getCountHeaderList(), activeColumn)){
 
-        WSTR::Logs::pushAndFlash("if(!WSTR::Settings::checkIsRange(0, WSTR::Settings::getCountHeaderList(), activeColumn)) == false", WSTR::AppType::Debug);
+        WSTR::Logs::pushAndFlash("if(!settings::checkIsRange(0ull, settings::getCountHeaderList(), activeColumn)) == false", WSTR::AppType::Debug);
         ui->tableWidget->sortByColumn(0, typeSort);
         return;
     }
 
     ui->tableWidget->sortByColumn(index, typeSort);
 
-    WSTR::Settings::setValue("activeColumn", std::to_string(index));
+    settings::setValue("activeColumn", std::to_string(index));
 
 }
 

@@ -25,7 +25,7 @@ Settings::Settings()
 ///
 Settings::~Settings()
 {
-    save();
+
 }
 
 ///
@@ -74,7 +74,8 @@ bool Settings::parse(const std::vector<std::string> &configBuffer)
 
         if(key.starts_with("path_"sv)) {
             if(!checkDirExists(value)){
-                std::stringstream ss{ "if(!checkDirExists(value)) == false\n" };
+                std::stringstream ss;
+                ss << "if(!checkDirExists(value)) == false\n";
                 ss << "value: " << value << std::endl;
                 WSTR::Logs::pushAndFlash(ss.str(), WSTR::AppType::Debug);
                 continue;
@@ -92,7 +93,8 @@ bool Settings::parse(const std::vector<std::string> &configBuffer)
                 headerList_.clear();
                 headerList_ = WSTR::Settings::Default::header;
 
-                std::stringstream ss{ "if(!checkHeaderItem(key, value)) == false\n" };
+                std::stringstream ss;
+                ss << "if(!checkHeaderItem(key, value)) == false\n";
                 ss << "key: " << key << " value: " << value << std::endl;
                 WSTR::Logs::pushAndFlash(ss.str(), WSTR::AppType::Debug);
                 return false;
@@ -112,6 +114,7 @@ bool Settings::parse(const std::vector<std::string> &configBuffer)
                 WSTR::Logs::pushAndFlash(ss.str(), WSTR::AppType::Debug);
                 return false;
             }
+
             auto&& [val, isType] = toType<size_t>(value);
             if(!isType) {
                 std::stringstream ss{ "auto&& [val, isType] = toType<int>(value);\
@@ -119,6 +122,7 @@ bool Settings::parse(const std::vector<std::string> &configBuffer)
                 WSTR::Logs::pushAndFlash(ss.str(), WSTR::AppType::Debug);
                 return false;
             }
+
             if(!checkIsRange(0ull, 100ull, val)){
                 std::stringstream ss{ "if(!checkIsRange(0, 100, value)) == false\n" };
                 WSTR::Logs::pushAndFlash(ss.str(), WSTR::AppType::Debug);
@@ -133,7 +137,7 @@ bool Settings::parse(const std::vector<std::string> &configBuffer)
             return false;
         }
 
-        WSTR::Logs::pushAndFlash("successful loading settings\nkey: " + key + " value: " + value, WSTR::AppType::Debug);
+        WSTR::Logs::pushAndFlash("successful loading settings\nkey: " + key + "\nvalue: " + value, WSTR::AppType::Debug);
     }
     return true;
 }
@@ -223,13 +227,25 @@ size_t Settings::getCountHeaderList()
 }
 
 ///
+/// \brief Settings::getFieldName
+/// \param fn
+/// \return
+///
+const std::string Settings::getFieldName(FieldNames fn)
+{
+    return Default::fieldNames[fn];
+}
+
+///
 /// \brief Settings::checkIsHeaderValue
 /// \param value
 /// \return
 ///
 bool Settings::checkIsHeaderValue(std::string_view value)
 {
-    return std::find(std::begin(WSTR::Settings::Default::headerArray), std::end(WSTR::Settings::Default::headerArray), value) != std::end(WSTR::Settings::Default::headerArray);
+    return std::find(std::begin(WSTR::Settings::Default::headerArray)
+                     , std::end(WSTR::Settings::Default::headerArray)
+                     , value) != std::end(WSTR::Settings::Default::headerArray);
 }
 
 ///
@@ -277,7 +293,8 @@ bool Settings::load()
     std::ifstream fs(settingFileName());
 
     if(!fs.is_open()){
-        std::stringstream ss{"Can`t open settings file: "};
+        std::stringstream ss;
+        ss << "Can`t open settings file: ";
         ss << settingFileName();
         WSTR::Logs::pushAndFlash(ss.str(), WSTR::AppType::Debug);
         return false;
@@ -292,6 +309,7 @@ bool Settings::load()
         fs.close();
         return false;
     }
+
     if(!parse(tmpVecConfig)) {
         WSTR::Logs::pushAndFlash("if(!parse(tmpVecConfig)) == true", WSTR::AppType::Debug);
         fs.close();
@@ -301,6 +319,12 @@ bool Settings::load()
     fs.close();
     WSTR::Logs::pushAndFlash("successful loading settings", WSTR::AppType::Debug);
     return true;
+}
+
+void Settings::loadFromDefault()
+{
+    bd_ = Default::bd;
+    headerList_ = Default::header;
 }
 
 ///
