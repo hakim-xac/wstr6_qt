@@ -58,7 +58,6 @@ void MainWindow::variableInitialization()
     ui->tableWidget->horizontalHeader()->show();
     ui->tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers); // prohibition of editing
     ui->tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
-    ui->progressBar->setValue(0);
 
     if(!initPathsView()){
         toThreadStatusBar("Не удалось Загрузить данные из файла настроек!", ui->statusBar, 5);
@@ -171,7 +170,6 @@ void MainWindow::clearTable(QTableWidget *table)
     table->setColumnCount(0);
     table->setRowCount(0);
     table->clearContents();
-    ui->progressBar->setValue(0);
 }
 
 ///
@@ -461,8 +459,6 @@ void MainWindow::on_runScan_clicked()
     assert(replay::getCount() == 0 && replay::getCountValidity() == 0);
 
     ui->tableWidget->setEnabled(false);
-    ui->progressBar->setValue(0);
-
 
     auto&& [vecReplays, isVecReplays] = createVectorWotReplaysThread(listFiles);
 
@@ -475,9 +471,7 @@ void MainWindow::on_runScan_clicked()
         return;
     }
 
-    ui->progressBar->setValue(50);
     replaysToTableThreads(*ui->tableWidget, vecReplays);
-    ui->progressBar->setValue(75);
 
 
     auto&& [activeColumn, isActiveColumn] = settings::getValue<size_t>(settings::getFieldName(fildNames::ActiveColumn));
@@ -489,8 +483,6 @@ void MainWindow::on_runScan_clicked()
     if(isActiveColumn) ui->tableWidget->sortByColumn(activeColumn, typeSort);
     else ui->tableWidget->sortByColumn(0, typeSort);
 
-
-    ui->progressBar->setValue(100);
     toThreadStatusBar("Обновлено!", ui->statusBar);
     ui->tableWidget->setEnabled(true);
 

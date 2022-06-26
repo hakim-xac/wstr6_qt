@@ -252,10 +252,16 @@
     </item>
     <item>
      <widget class="QFrame" name="frame">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="maximumSize">
        <size>
-        <width>1061</width>
-        <height>361</height>
+        <width>16777215</width>
+        <height>16777215</height>
        </size>
       </property>
       <property name="frameShape">
@@ -267,10 +273,16 @@
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
         <widget class="QTableWidget" name="tableWidget">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="maximumSize">
           <size>
-           <width>1061</width>
-           <height>361</height>
+           <width>16777215</width>
+           <height>16777215</height>
           </size>
          </property>
          <property name="font">
@@ -281,13 +293,6 @@
         </widget>
        </item>
       </layout>
-     </widget>
-    </item>
-    <item>
-     <widget class="QProgressBar" name="progressBar">
-      <property name="value">
-       <number>24</number>
-      </property>
      </widget>
     </item>
    </layout>
