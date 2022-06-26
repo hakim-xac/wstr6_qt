@@ -19,7 +19,6 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , countThreads_(std::thread::hardware_concurrency())    
 {
 
     using settings = WSTR::Settings;
@@ -212,11 +211,6 @@ void MainWindow::toThreadStatusBar(QString&& str, QLabel* const label, int waitS
 
 }
 
-///
-/// \brief MainWindow::showStatusBar
-/// \param str
-/// \param label
-///
 void MainWindow::showStatusBar(const QString &str, QLabel* const label, int waitSec)
 {
     if(!label){
@@ -230,30 +224,63 @@ void MainWindow::showStatusBar(const QString &str, QLabel* const label, int wait
     label->setText(QString());
 }
 
-std::pair<std::vector<WSTR::Replay>, bool> MainWindow::createVectorWotReplays(const QList<QFileInfo>& listFiles)
+
+std::pair<std::vector<WSTR::Replay>, bool> MainWindow::createVectorWotReplaysThread(const QList<QFileInfo>& listFiles)
 {
+    std::vector<WSTR::Replay> vecReplays;
+    bool isVecReplays{};
+    bool isSuccess{};
+
+    std::thread createVectorWotReplaysThread{ &MainWindow::createVectorWotReplays, std::cref(listFiles), std::ref(vecReplays), std::ref(isSuccess), std::ref(isVecReplays) };
+    createVectorWotReplaysThread.detach();
+
+    QString text{ "Ожидание" };
+    QString newText{ text };
+    while(!isSuccess){
+
+        newText += '.';
+        ui->statusBar->setText(newText);
+        QApplication::processEvents();
+        QThread::msleep(100);
+        if(newText.size() > text.size() + 3) newText = text;
+
+    }
+    ui->statusBar->setText("");
+
+    return { vecReplays, true };
+}
+
+void MainWindow::createVectorWotReplays(const QList<QFileInfo>& listFiles, std::vector<WSTR::Replay>& vec, bool& isSuccess, bool& isResult)
+{
+    isSuccess = false;
+
     if(!listFiles.size()){
 
     WSTR::Logs::pushAndFlash("std::pair<std::vector<WSTR::Replay>, bool> MainWindow::createVectorWotReplays(const QList<QFileInfo>& listFiles) \
     if(!listFiles.size()) == true", WSTR::AppType::Debug);
 
-        return { {}, false };
+        isSuccess = true;
+        vec.clear();
+        isResult = false;
     }
 
-    ui->runScan->setEnabled(false);
+    //ui->runScan->setEnabled(false);
 
     size_t size{ static_cast<size_t>(listFiles.size()) };
 
-    size_t minThreads{ std::min(static_cast<size_t>((countThreads_ ? countThreads_ - 1 : 2)), size) };
+    auto countThread{ countThreads() };
+
+    size_t minThreads{ std::min(static_cast<size_t>((countThread < 2 ? 2 : countThread - 1)), size) };
 
     std::vector<std::thread> threads;
     threads.reserve(minThreads);
 
-    std::vector<WSTR::Replay> vecReplays(size);
+    vec.clear();
+    vec.resize(size);
 
     size_t part{ std::max(size / minThreads, size_t(1)) };
 
-    using iter = decltype(vecReplays.begin());
+    using iter = decltype(vec.begin());
     using type_paths = decltype(listFiles);
 
     for(size_t i{}, ie{ minThreads }; i != ie; ++i){
@@ -264,9 +291,9 @@ std::pair<std::vector<WSTR::Replay>, bool> MainWindow::createVectorWotReplays(co
         if(i == ie - 1) end = size;
 
         threads.emplace_back(std::thread(&MainWindow::addToThread<iter, type_paths>
-                                         , vecReplays.begin()
-                                         , vecReplays.begin() + begin
-                                         , vecReplays.begin() + end
+                                         , vec.begin()
+                                         , vec.begin() + begin
+                                         , vec.begin() + end
                                          , std::cref(listFiles)));
     }
 
@@ -274,9 +301,20 @@ std::pair<std::vector<WSTR::Replay>, bool> MainWindow::createVectorWotReplays(co
         if(elem.joinable()) elem.join();
     }
 
-    ui->runScan->setEnabled(true);
+    isSuccess = true;
+    isResult = true;
 
-    return { vecReplays, true };
+    //ui->runScan->setEnabled(true);
+
+}
+
+///
+/// \brief MainWindow::countThreads
+/// \return
+///
+uint MainWindow::countThreads()
+{
+    return  std::thread::hardware_concurrency();
 }
 
 
@@ -425,11 +463,12 @@ void MainWindow::on_runScan_clicked()
     ui->tableWidget->setEnabled(false);
     ui->progressBar->setValue(0);
 
-    auto&& [vecReplays, isVecReplays] = createVectorWotReplays(listFiles);
+
+    auto&& [vecReplays, isVecReplays] = createVectorWotReplaysThread(listFiles);
 
     if(!isVecReplays) {
-        WSTR::Logs::pushAndFlash("    auto&& [vecReplays, isVecReplays] = createVectorWotReplays(listFiles);\
-                                   if(!isVecReplays) == false", WSTR::AppType::Debug);
+        WSTR::Logs::pushAndFlash("auto&& [vecReplays, isVecReplays] = createVectorWotReplaysThread(listFiles);\
+                                 if(!isVecReplays) == false", WSTR::AppType::Debug);
         toThreadStatusBar("Неизвестная Ошибка!", ui->statusBar);
 
         clearTable(ui->tableWidget);

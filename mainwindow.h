@@ -119,11 +119,19 @@ private:
     static void showStatusBar(const QString& str, QLabel* const label, int waitSec);
 
     ///
-    /// \brief createVectorWotReplays
-    /// \param listFiles
+    /// \brief createVectorWotReplaysThread
     /// \return
     ///
-    std::pair<std::vector<WSTR::Replay>, bool> createVectorWotReplays(const QList<QFileInfo>& listFiles);
+    std::pair<std::vector<WSTR::Replay>, bool> createVectorWotReplaysThread(const QList<QFileInfo>& listFiles);
+
+    ///
+    /// \brief createVectorWotReplays
+    /// \param listFiles
+    /// \param vec
+    /// \param isSuccess
+    /// \param isResult
+    ///
+    static void createVectorWotReplays(const QList<QFileInfo>& listFiles, std::vector<WSTR::Replay>& vec, bool& isSuccess, bool & isResult);
 
     ///
     /// \brief addToThread
@@ -136,16 +144,17 @@ private:
     template< class TypeVecIter, class TypePaths>
     static void addToThread(TypeVecIter first, TypeVecIter begin, TypeVecIter end, const TypePaths& basePaths);
 
+    ///
+    /// \brief countThreads
+    /// \return
+    ///
+    static uint countThreads();
+
 private:
     ///
     /// \brief ui
     ///
     Ui::MainWindow *ui;
-
-    ///
-    /// \brief countThreads_
-    ///
-    uint countThreads_;
 
 };
 
@@ -301,7 +310,9 @@ bool MainWindow::replaysToTableThreads(TypeWidget& table, const std::vector<WSTR
 
     size_t size{ vec.size() };
 
-    size_t minThreads{ std::min(static_cast<size_t>((countThreads_ ? countThreads_ - 1 : 2)), size) };
+    auto countThread{ countThreads() };
+
+    size_t minThreads{ std::min(static_cast<size_t>((countThread < 2 ? 2 : countThread - 1)), size) };
 
     std::vector<std::thread> threads;
     threads.reserve(minThreads);
