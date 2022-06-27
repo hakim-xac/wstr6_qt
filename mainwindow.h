@@ -49,18 +49,18 @@ private:
     /// \return
     ///
     template <typename Type>
-    static std::pair< QString, bool > toQString(Type&& str);
+    inline static std::pair< QString, bool > toQString(Type&& str);
 
     ///
     /// \brief variableInitialization
     ///
-    void variableInitialization();
+    inline void variableInitialization();
 
     ///
     /// \brief initPathsView
     /// \return
     ///
-    bool initPathsView();
+    inline bool initPathsView();
 
     ///
     /// \brief clearTable
@@ -74,16 +74,16 @@ private:
     /// \param filter
     /// \return
     ///
-    template <typename TypeDirName, typename TypeFilter = QString >
-    QFileInfoList scanDirectory(TypeDirName&& pathDir, TypeFilter&& filter);
+    template <typename TypeDirName, typename TypeFilter, typename = std::enable_if_t<std::is_same_v<std::decay_t<TypeFilter>, QString>> >
+    inline QFileInfoList scanDirectory(TypeDirName&& pathDir, TypeFilter&& filter);
 
     ///
-    /// \brief replaysToTable
+    /// \brief replaysToTableThreads
     /// \param table
     /// \param vec
     /// \return
     ///
-    template <typename TypeWidget = QTableWidget>
+    template <typename TypeWidget, typename= std::enable_if_t<std::is_same_v<TypeWidget, QTableWidget>>>
     bool replaysToTableThreads(TypeWidget& table, const std::vector<WSTR::Replay>& vec);
 
     ///
@@ -148,7 +148,7 @@ private:
     /// \brief countThreads
     /// \return
     ///
-    static uint countThreads();
+    static uint countThreads() noexcept;
 
 private:
     ///
@@ -184,7 +184,7 @@ std::pair< QString, bool > MainWindow
 /// \param filter
 /// \return
 ///
-template <typename TypeDirName, typename TypeFilter>
+template <typename TypeDirName, typename TypeFilter, typename T3 >
 QFileInfoList MainWindow
 ::scanDirectory(TypeDirName&& pathDir, TypeFilter&& filter){
 
@@ -290,7 +290,7 @@ bool MainWindow::setHeaderInTable(QTableWidget &table)
 }
 
 
-template <typename TypeWidget>
+template <typename TypeWidget, typename T2>
 bool MainWindow::replaysToTableThreads(TypeWidget& table, const std::vector<WSTR::Replay> &vec)
 {
 

@@ -25,7 +25,6 @@ set(PROJECT_SOURCES
         settings.cpp
         logs.cpp
         replay.cpp
-
         mainwindow.h
         mainwindow.ui
         settings.h
@@ -76,3 +75,4 @@ set_target_properties(wstr6_qt PROPERTIES
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(wstr6_qt)
 endif()
+

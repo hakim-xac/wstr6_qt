@@ -9,8 +9,10 @@
 #include <fstream>
 #include <QString>
 #include <cassert>
-#include <QJsonObject>
 #include <mutex>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
 #include "enums.h"
 
 namespace WSTR {
@@ -105,30 +107,30 @@ public:             // PUBLIC FUNCTIONS
     template <typename TypeFileName>
     Replay(TypeFileName&& filename, size_t id);
 
-    bool setValidity(bool newValidity);
-    bool setIsReplay(bool newIsReplay);
-    bool setIsHasMods(bool newHasMods);
-    bool setplayerID(size_t newplayerID);
-    bool setArenaCreateTime(size_t newArenaCreateTime);
-    bool setId(size_t newId);
-    bool setSize(size_t newSize);
-    bool setRespawn(size_t newRespawn);
-    bool setDuration(size_t newDuration);
-    bool setWinnerTeam(size_t newWinnerTeam);
-    bool setBattleType(size_t newBattleType);
-    bool setDateTime(const std::string &newDateTime);
-    bool setVehicle(const std::string &newVehicle);
-    bool setMapName(const std::string &newMapName);
-    bool setPlayerName(const std::string &newPlayerName);
-    bool setMapDisplayName(const std::string &newMapDisplayName);
-    bool setReplayName(const std::string &newReplayName);
-    bool setClientVersionFromXML(const std::string &newClientVersionFromXML);
+    bool setValidity(bool newValidity)                                          noexcept;
+    bool setIsReplay(bool newIsReplay)                                          noexcept;
+    bool setIsHasMods(bool newHasMods)                                          noexcept;
+    bool setplayerID(size_t newplayerID)                                        noexcept;
+    bool setArenaCreateTime(size_t newArenaCreateTime)                          noexcept;
+    bool setId(size_t newId)                                                    noexcept;
+    bool setSize(size_t newSize)                                                noexcept;
+    bool setRespawn(size_t newRespawn)                                          noexcept;
+    bool setDuration(size_t newDuration)                                        noexcept;
+    bool setWinnerTeam(size_t newWinnerTeam)                                    noexcept;
+    bool setBattleType(size_t newBattleType)                                    noexcept;
+    bool setDateTime(const std::string &newDateTime)                            noexcept;
+    bool setVehicle(const std::string &newVehicle)                              noexcept;
+    bool setMapName(const std::string &newMapName)                              noexcept;
+    bool setPlayerName(const std::string &newPlayerName)                        noexcept;
+    bool setMapDisplayName(const std::string &newMapDisplayName)                noexcept;
+    bool setReplayName(const std::string &newReplayName)                        noexcept;
+    bool setClientVersionFromXML(const std::string &newClientVersionFromXML)    noexcept;
 
 
-    static WSTR::BattleType getBattleType(const std::string& index);
-    static size_t getCount();
-    static size_t getCountValidity();
-    static void clearCounts();
+    static WSTR::BattleType getBattleType(const std::string& index)             noexcept;
+    static size_t getCount()                                                    noexcept;
+    static size_t getCountValidity()                                            noexcept;
+    static void clearCounts()                                                   noexcept;
 
 public:
 
@@ -139,7 +141,7 @@ public:
     /// \return
     ///
     template <typename Type, typename KeyType>
-    constexpr std::decay_t<Type> getValue(KeyType&& key) const noexcept;
+    constexpr std::decay_t<Type> getValue(KeyType&& key)                        const noexcept;
 
     ///
     /// \brief isGetValue
@@ -147,7 +149,7 @@ public:
     /// \return
     ///
     template <typename Type, typename KeyType>
-    constexpr std::pair<std::decay_t<Type>, bool> isGetValue(KeyType&& key) const noexcept;
+    constexpr std::pair<std::decay_t<Type>, bool> isGetValue(KeyType&& key)     const noexcept;
 
     ///
     /// \brief setValue
@@ -156,7 +158,7 @@ public:
     /// \return
     ///
     template <typename Type>
-    void setValue(const std::string& key, Type&& newValue) noexcept;
+    void setValue(const std::string& key, Type&& newValue)                      noexcept;
 
     ///
     /// \brief checkValue
@@ -165,7 +167,7 @@ public:
     /// \return
     ///
     template <typename Type, typename KeyType>
-    constexpr bool checkValue(KeyType&& key) const noexcept;
+    constexpr bool checkValue(KeyType&& key)                                    const noexcept;
 
     ///
     /// \brief setCheckValue
@@ -173,7 +175,7 @@ public:
     /// \param newValue
     ///
     template <typename Type>
-    bool setCheckValue(const std::string& key, Type&& newValue) noexcept;
+    bool setCheckValue(const std::string& key, Type&& newValue)                 noexcept;
 
 
 private:
@@ -183,7 +185,7 @@ private:
     /// \param fs
     /// \return
     ///
-    size_t fstreamSize(std::ifstream& fs);
+    size_t fstreamSize(std::ifstream& fs) const noexcept;
 
     ///
     /// \brief parseFirstBlock
@@ -191,15 +193,21 @@ private:
     /// \param replay
     /// \return
     ///
-    bool parseFirstBlock(QString&& block, WSTR::Replay& replay);
+    template <typename BlockType, typename ReplayType, typename = std::enable_if_t<
+                  std::is_same_v<std::decay_t<BlockType>, QString>
+                  && std::is_same_v<std::decay_t<ReplayType>, WSTR::Replay>>>
+    bool parseFirstBlock(BlockType&& block, ReplayType&& replay)  const noexcept;
 
     ///
     /// \brief parseSecondBlock
     /// \param block
     /// \param replay
     /// \return
-    ///
-    bool parseSecondBlock(QString&& block, WSTR::Replay& replay);
+    ///    
+    template <typename BlockType, typename ReplayType, typename = std::enable_if_t<
+                  std::is_same_v<std::decay_t<BlockType>, QString>
+                  && std::is_same_v<std::decay_t<ReplayType>, WSTR::Replay>>>
+    bool parseSecondBlock(BlockType&& block, ReplayType&& replay);
 
     ///
     /// \brief ParseCommonBlock
@@ -236,15 +244,32 @@ private:
 
 };
 
+template<typename BlockType, typename ReplayType, typename T3>
+bool Replay::parseSecondBlock(BlockType &&block,ReplayType &&replay)
+{
+    QJsonParseError parseError{};
+    QJsonDocument json{ QJsonDocument::fromJson(std::forward<BlockType>(block).toUtf8(), &parseError) };
+
+    if(parseError.error != QJsonParseError::NoError) return false;
+    if(!json.isArray()) return false;
+    if(!json.array()[0].isObject()) return false;
+
+    QJsonObject oJson{ json.array()[0].toObject() };
+
+    auto it{ oJson.find("common") };
+    if(it ==oJson.end()) return false;
+
+    ParseCommonBlock(it.value().toObject(), replay);
+
+    return true;
+}
+
 
 
 
 //////////////////////////// implementation of class functions /////////////////////////////////////////////
 
-///
-/// \brief Replay::Replay
-/// \param filename
-///
+
 template <typename TypeFileName>
 Replay
 ::Replay(TypeFileName&& filename, size_t id){
@@ -254,11 +279,10 @@ Replay
 
 }
 
-///
-/// \brief Replay::parseFileWotreplay
-/// \param filename
-/// \return
-///
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////
+
 template <typename TypeFileName>
 bool Replay
 ::parseFileWotreplay(TypeFileName&& filename, size_t id){
@@ -314,12 +338,10 @@ bool Replay
     return true;
 }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////
 
-///
-/// \brief Replay::replaceFileName
-/// \param filename
-/// \return
-///
 template <typename TypeAllFileName>
 constexpr std::string_view Replay
 ::replaceFileName(TypeAllFileName&& filename){
@@ -335,13 +357,10 @@ constexpr std::string_view Replay
     return str.substr(0, find_dot);
 }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////
 
-///
-/// \brief Replay::get
-/// \param stream
-/// \param size
-/// \return
-///
 template <typename Type>
 constexpr std::decay_t<Type> Replay
 ::get(std::istream& stream, size_t size){
@@ -359,24 +378,23 @@ constexpr std::decay_t<Type> Replay
     return value;
 }
 
-///
-/// \brief Replay::getValue
-/// \param key
-/// \return
-///
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////
+
 template <typename Type, typename KeyType>
-constexpr std::decay_t<Type> Replay::getValue(KeyType&& key) const noexcept{
+constexpr std::decay_t<Type> Replay::getValue(KeyType&& key) const noexcept
+{
     using type = std::decay_t<Type>;
     auto&& [value, isValue] = isGetValue<type>(std::forward<KeyType>(key));
     if(isValue) return value;
     return type();
 }
 
-///
-/// \brief Replay::isGetValue
-/// \param key
-/// \return
-///
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////
+
 template <typename Type, typename KeyType>
 constexpr std::pair<std::decay_t<Type>, bool> Replay::isGetValue(KeyType&& key) const noexcept{
 
@@ -432,11 +450,10 @@ constexpr std::pair<std::decay_t<Type>, bool> Replay::isGetValue(KeyType&& key) 
     return { type(), false };
 }
 
-///
-/// \brief Replay::setValue
-/// \param key
-/// \param newValue
-///
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////
+
 template <typename Type>
 void Replay::setValue(const std::string& key, Type&& newValue) noexcept {
 
@@ -459,23 +476,20 @@ void Replay::setValue(const std::string& key, Type&& newValue) noexcept {
     }
 }
 
-///
-/// \brief Replay::checkValue
-/// \param key
-/// \param value
-/// \return
-///
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////
+
 template <typename Type, typename KeyType>
 constexpr bool Replay::checkValue(KeyType&& key) const noexcept {
     auto&& [_, isValue] = isGetValue<std::decay_t<Type>>(std::forward<KeyType>(key));
     return isValue;
 }
 
-///
-/// \brief Replay::setCheckValue
-/// \param key
-/// \param newValue
-///
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////
+
 template <typename Type>
 bool Replay::setCheckValue(const std::string& key, Type&& newValue) noexcept{
 
@@ -487,5 +501,45 @@ bool Replay::setCheckValue(const std::string& key, Type&& newValue) noexcept{
     if(!isValue) return false;
     return afterValue == value;
 }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename BlockType, typename ReplayType, typename T3>
+bool Replay::parseFirstBlock(BlockType&& block, ReplayType&& replay) const noexcept
+{
+    QJsonDocument json{ QJsonDocument::fromJson(std::forward<BlockType>(block).toUtf8()) };
+    if(json.isNull() || !json.isObject()) return false;
+
+
+    replay.setClientVersionFromXML(json["clientVersionFromXml"].toString().toStdString());
+    replay.setDateTime(json["dateTime"].toString().toStdString());
+    replay.setIsHasMods(json["hasMods"].toBool());
+    replay.setMapName(json["mapName"].toString().toStdString());
+    replay.setMapDisplayName(json["mapDisplayName"].toString().toStdString());
+    replay.setplayerID(json["playerID"].toInteger());
+    replay.setBattleType(json["battleType"].toInteger());
+    replay.setPlayerName(json["playerName"].toString().toStdString());
+    replay.setVehicle(json["playerVehicle"].toString().toStdString());
+
+
+    //QJsonDocument jsonVehicles{ QJsonDocument::fromVariant(json["vehicles"].toString().toUtf8()) };
+
+    //auto n {json["vehicles"].toString().toStdString() };
+
+   // if(jsonVehicles.isNull() || !jsonVehicles.isObject()) return false;
+
+
+    return true;
+
+}
+
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
 }
 #endif // REPLAY_H

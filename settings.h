@@ -22,7 +22,8 @@ public:
     /// \param fn
     /// \return
     ///
-    static const std::string getFieldName(WSTR::FieldNames fn);
+    template <typename TypeInMap = std::string>
+    static const TypeInMap getFieldName(WSTR::FieldNames fn);
 
 
 private:
@@ -33,65 +34,63 @@ private:
         ///
         ///
         static inline std::map<WSTR::FieldNames, const std::string> fieldNames{
-
-            { WSTR::FieldNames::ActiveColumn, "activeColumn" }
-            , { WSTR::FieldNames::TypeSortColumns, "typeSortColumns" }
-            , { WSTR::FieldNames::CurrentPathIndex, "currentPathIndex" }
-            , { WSTR::FieldNames::CountOfPaths, "countOfPaths" }
-            , { WSTR::FieldNames::WaitUpdateStatusBar_s, "waitUpdateStatusBar_s" }
-
+            { WSTR::FieldNames::ActiveColumn,               "activeColumn"          }
+            , { WSTR::FieldNames::TypeSortColumns,          "typeSortColumns"       }
+            , { WSTR::FieldNames::CurrentPathIndex,         "currentPathIndex"      }
+            , { WSTR::FieldNames::CountOfPaths,             "countOfPaths"          }
+            , { WSTR::FieldNames::WaitUpdateStatusBar_s,    "waitUpdateStatusBar_s" }
         };
 
         ///
         ///
         ///
         static inline const std::map<const std::string, std::string> bd{
-            { WSTR::Settings::getFieldName(WSTR::FieldNames::CountOfPaths), "0" }
-            , { WSTR::Settings::getFieldName(WSTR::FieldNames::CurrentPathIndex), "0" }
-            , { WSTR::Settings::getFieldName(WSTR::FieldNames::WaitUpdateStatusBar_s), "2" }
-            , { WSTR::Settings::getFieldName(WSTR::FieldNames::ActiveColumn), "0" }
-            , { WSTR::Settings::getFieldName(WSTR::FieldNames::TypeSortColumns), "0" }
+            { WSTR::Settings::getFieldName(WSTR::FieldNames::CountOfPaths),             "0" }
+            , { WSTR::Settings::getFieldName(WSTR::FieldNames::CurrentPathIndex),       "0" }
+            , { WSTR::Settings::getFieldName(WSTR::FieldNames::WaitUpdateStatusBar_s),  "2" }
+            , { WSTR::Settings::getFieldName(WSTR::FieldNames::ActiveColumn),           "0" }
+            , { WSTR::Settings::getFieldName(WSTR::FieldNames::TypeSortColumns),        "0" }
         };
 
         ///
         ///
         ///
         static inline const std::map<const std::string, std::string> header{
-            { "header_1", "id" }
-            , { "header_2", "size" }
-            , { "header_3", "validity" }
-            , { "header_4", "hasMods" }
-            , { "header_5", "respawn" }
-            , { "header_6", "mapName" }
-            , { "header_7", "mapDisplayName" }
-            , { "header_8", "playerName" }
-            , { "header_9", "playerVehicle" }
-            , { "header_10", "playerID" }
+            { "header_1", "id"                      }
+            , { "header_2", "size"                  }
+            , { "header_3", "validity"              }
+            , { "header_4", "hasMods"               }
+            , { "header_5", "respawn"               }
+            , { "header_6", "mapName"               }
+            , { "header_7", "mapDisplayName"        }
+            , { "header_8", "playerName"            }
+            , { "header_9", "playerVehicle"         }
+            , { "header_10", "playerID"             }
             , { "header_11", "clientVersionFromXml" }
-            , { "header_12", "battleType" }
+            , { "header_12", "battleType"           }
         };
 
         ///
         ///
         ///
-        static constexpr std::array<std::string_view, 17> headerArray{
-            "id"
-            , "size"
-            , "validity"
-            , "hasMods"
-            , "respawn"
-            , "duration"
-            , "winnerTeam"
-            , "dateTime"
-            , "playerVehicle"
-            , "mapName"
-            , "playerName"
-            , "mapDisplayName"
-            , "replayName"
-            , "playerID"
-            , "clientVersionFromXml"
-            , "arenaCreateTime"
-            , "battleType"
+        static inline const std::map<const std::string, int> headerMap{
+            { "id"                      , 0 }
+            , {"size"                   , 0 }
+            , {"validity"               , 0 }
+            , {"hasMods"                , 0 }
+            , {"respawn"                , 0 }
+            , {"duration"               , 0 }
+            , {"winnerTeam"             , 0 }
+            , {"dateTime"               , 0 }
+            , {"playerVehicle"          , 0 }
+            , {"mapName"                , 0 }
+            , {"playerName"             , 0 }
+            , {"mapDisplayName"         , 0 }
+            , {"replayName"             , 0 }
+            , {"playerID"               , 0 }
+            , {"clientVersionFromXml"   , 0 }
+            , {"arenaCreateTime"        , 0 }
+            , {"battleType"             , 0 }
         };
 
     };
@@ -173,7 +172,8 @@ private:            // PRIVATE STATIC FUNCTIONS
     /// \param sb
     /// \return
     ///
-    static std::map<const std::string, std::string>* selectBase(WSTR::SelectBase sb = WSTR::SelectBase::General);
+    template <typename OutType>
+    static std::map<const OutType, OutType>* selectBase(WSTR::SelectBase sb = WSTR::SelectBase::General);
 
 private:            // PRIVATE FUNCTIONS
 
@@ -199,7 +199,7 @@ private:            // PRIVATE FUNCTIONS
     /// \return
     ///
     template <typename KeyType, typename ValueType>
-    static bool checkValue(KeyType&& key, ValueType&& value, WSTR::SelectBase sb = WSTR::SelectBase::General);
+    static bool checkValue(KeyType&& key, ValueType&& value, WSTR::SelectBase sb = WSTR::SelectBase::General) noexcept;
 
 
 public:             // PUBLIC FUNCTIONS
@@ -265,12 +265,12 @@ public:             // PUBLIC FUNCTIONS
     static const std::string getVersionApp();
 
     ///
-    /// \brief toType
+    /// \brief stringToType
     /// \param str
     /// \return
     ///
-    template <typename OutType, typename Type>
-    static std::pair< OutType, bool > toType(Type&& str);
+    template <typename OutType, typename InType>
+    static std::pair< OutType, bool > stringToType(InType&& str);
 
     ///
     /// \brief checkIsRange
@@ -280,7 +280,7 @@ public:             // PUBLIC FUNCTIONS
     /// \return
     ///
     template <typename RangeBegin, typename RangeEnd, typename ItemType>
-    static bool checkIsRange(RangeBegin&& begin, RangeEnd&& end, ItemType&& item);
+    static bool checkIsRange(RangeBegin&& begin, RangeEnd&& end, ItemType&& item) noexcept;
 
     ///
     /// \brief getCountHeaderList
@@ -293,18 +293,64 @@ public:             // PUBLIC FUNCTIONS
 
 //////////////////////////// implementation of class functions /////////////////////////////////////////////
 
-///
-/// \brief Settings::getValue
-/// \param key
-/// \param sb
-/// \return
-///
+
+template <typename TypeInMap>
+inline const TypeInMap Settings::getFieldName(FieldNames fn)
+{
+    using mapped_type = decltype(Default::fieldNames)::mapped_type;
+    static_assert(std::is_same_v<mapped_type, const TypeInMap>, "gfjgfjfgjf");
+
+    return Default::fieldNames[fn];
+}
+
+template<typename OutType>
+std::map<const OutType, OutType>*Settings
+::selectBase(SelectBase sb)
+{
+    using bdKey             = decltype(bd_)::key_type;
+    using bdValue           = decltype(bd_)::mapped_type;
+    using pathsListKey      = decltype(pathsList_)::key_type;
+    using pathsListValue    = decltype(pathsList_)::mapped_type;
+    using headerListKey     = decltype(headerList_)::key_type;
+    using headerListValue   = decltype(headerList_)::mapped_type;
+
+    using outType           = std::decay_t<OutType>;
+
+    static_assert(std::is_same_v<bdKey, const outType>
+            && std::is_same_v<bdValue, outType>
+            && std::is_same_v<pathsListKey, const outType>
+            && std::is_same_v<pathsListValue, outType>
+            && std::is_same_v<headerListKey, const outType>
+            && std::is_same_v<headerListValue, outType>
+            , "Map keys must be type T constants, values must be type T");
+
+    switch(sb){
+    case WSTR::SelectBase::General:
+    return &bd_;
+    break;
+    case WSTR::SelectBase::Paths:
+    return &pathsList_;
+    break;
+    case WSTR::SelectBase::Headers:
+    return &headerList_;
+    break;
+
+    default:
+        return nullptr;
+    }
+
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////
+
 template <typename Type>
 std::pair<std::decay_t<Type>, bool> Settings
 ::getValue(const std::string& key, WSTR::SelectBase sb){
     using type = std::decay_t<Type>;
 
-    auto base{ selectBase(sb) };
+    auto base{ selectBase<std::string>(sb) };
 
     if(!base) return { type(), false };
     try{
@@ -325,17 +371,14 @@ std::pair<std::decay_t<Type>, bool> Settings
 
 }
 
-///
-/// \brief Settings::setValue
-/// \param key
-/// \param value
-/// \param sb
-/// \return
-///
+////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////
+
 template <typename KeyType, typename ValueType>
 bool Settings
 ::setValue(KeyType&& key, ValueType&& value, WSTR::SelectBase sb ){
-    std::map<const std::string, std::string>* base{ selectBase(sb) };
+    auto base{ selectBase<std::string>(sb) };
     if(!base) return false;
 
     auto&& [_, isKey] = getValue(key, sb);
@@ -348,15 +391,12 @@ bool Settings
     return true;
 }
 
-///
-/// \brief Settings::checkValue
-/// \param key
-/// \param value
-/// \param sb
-/// \return
-///
+////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////
+
 template<typename KeyType, typename ValueType>
-bool Settings::checkValue(KeyType&& key, ValueType&& value, SelectBase sb)
+bool Settings::checkValue(KeyType&& key, ValueType&& value, SelectBase sb) noexcept
 {
     auto&& [newValue, isGet] = getValue(std::forward<KeyType>(key), sb);
 
@@ -381,16 +421,16 @@ bool Settings::checkValue(KeyType&& key, ValueType&& value, SelectBase sb)
     return true;
 }
 
-///
-/// \brief Settings::toType
-/// \param str
-/// \return
-///
-template <typename OutType, typename Type>
+////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////
+
+template <typename OutType, typename InType>
 std::pair< OutType, bool > Settings
-::toType(Type&& str){
+::stringToType(InType&& str){
+
     std::stringstream ss;
-    ss << std::forward<Type>(str);
+    ss << std::forward<InType>(str);
     if(ss.fail()) return { OutType(), false };
 
     OutType tmp{};
@@ -400,19 +440,36 @@ std::pair< OutType, bool > Settings
     return { tmp, true };
 }
 
-
+////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////
 
 template <typename RangeBegin, typename RangeEnd, typename ItemType>
 bool Settings
-::checkIsRange(RangeBegin&& begin, RangeEnd&& end, ItemType&& item){
+::checkIsRange(RangeBegin&& begin, RangeEnd&& end, ItemType&& item) noexcept
+{
+
     using decay_begin = std::decay_t<RangeBegin>;
     using decay_end = std::decay_t<RangeEnd>;
     using decay_item = std::decay_t<ItemType>;
 
     static_assert(std::is_same_v<decay_begin, decay_end>
-            && std::is_same_v<decay_begin, decay_item>, "RangeBegin && RangeEnd && ItemType --> Must be of the same type!");
-    return item >= begin && item <= end;
+            && std::is_same_v<decay_begin, decay_item>
+            , "RangeBegin && RangeEnd && ItemType --> Must be of the same type!");
+
+    auto begin__{ std::forward<RangeBegin>(begin) };
+    auto end__{ std::forward<RangeBegin>(end) };
+    auto item__{ std::forward<RangeBegin>(item) };
+
+    return item__ >= begin__ && item__ <= end__;
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
 
 
 }

@@ -12,10 +12,8 @@
 #include <functional>
 #include <chrono>
 
-///
-/// \brief MainWindow::MainWindow
-/// \param parent
-///
+
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -38,18 +36,12 @@ MainWindow::MainWindow(QWidget *parent)
 
 }
 
-///
-/// \brief MainWindow::~MainWindow
-///
 MainWindow::~MainWindow()
 {
     WSTR::Settings::save();
     delete ui;
 }
 
-///
-/// \brief MainWindow::variableInitialization
-///
 void MainWindow::variableInitialization()
 {
     WSTR::Logs::pushAndFlash("start MainWindow::variableInitialization()", WSTR::AppType::Debug);
@@ -66,15 +58,9 @@ void MainWindow::variableInitialization()
         return;
     }
 
-    toThreadStatusBar("ХАЙ!", ui->statusBar, 5);
-
     WSTR::Logs::pushAndFlash("end MainWindow::variableInitialization()", WSTR::AppType::Debug);
 }
 
-///
-/// \brief MainWindow::initPathsView
-/// \return
-///
 bool MainWindow::initPathsView()
 {
     using namespace std::string_literals;
@@ -90,11 +76,11 @@ bool MainWindow::initPathsView()
         WSTR::Logs::pushAndFlash("isCountPath == true", WSTR::AppType::Debug);
 
         QStringList paths;
-        auto&& [countPaths_i, isCountPaths_s] = settings::toType<int>(countPaths_s);
+        auto&& [countPaths_i, isCountPaths_s] = settings::stringToType<int>(countPaths_s);
         if(!isCountPaths_s){
 
             std::stringstream ss;
-            ss << "auto [countPaths_i, isCountPaths_s] = toType<int>(countPaths_s);\n";
+            ss << "auto [countPaths_i, isCountPaths_s] = stringToType<int>(countPaths_s);\n";
             ss << "isCountPaths_s == false\n";
             ss << "countPaths_i: " << countPaths_i << " isCountPaths_s: " << isCountPaths_s << "\n";
             WSTR::Logs::pushAndFlash(ss.str(), WSTR::AppType::Debug);
@@ -122,7 +108,7 @@ bool MainWindow::initPathsView()
             auto [currentPathIndex_s, isCurrentPathIndex] = settings::getValue(settings::getFieldName(fieldNames::CurrentPathIndex));
             if(isCurrentPathIndex){
 
-            auto [currentIndex, isCurrentIndex] = settings::toType<int>(currentPathIndex_s);
+            auto [currentIndex, isCurrentIndex] = settings::stringToType<int>(currentPathIndex_s);
             ui->paths->setCurrentIndex(0);
 
             if(isCurrentIndex && settings::checkIsRange(0, static_cast<int>(paths.size()) - 1, currentIndex)) {
@@ -153,10 +139,6 @@ bool MainWindow::initPathsView()
     return false;
 }
 
-///
-/// \brief MainWindow::clearTable
-/// \param table
-///
 void MainWindow::clearTable(QTableWidget *table)
 {
 
@@ -172,11 +154,6 @@ void MainWindow::clearTable(QTableWidget *table)
     table->clearContents();
 }
 
-///
-/// \brief MainWindow::toThreadStatusBar
-/// \param str
-/// \param label
-///
 void MainWindow::toThreadStatusBar(QString&& str, QLabel* const label, int waitSec)
 {
     using time = std::chrono::high_resolution_clock;
@@ -221,7 +198,6 @@ void MainWindow::showStatusBar(const QString &str, QLabel* const label, int wait
     QThread::sleep(waitSec);
     label->setText(QString());
 }
-
 
 std::pair<std::vector<WSTR::Replay>, bool> MainWindow::createVectorWotReplaysThread(const QList<QFileInfo>& listFiles)
 {
@@ -306,24 +282,11 @@ void MainWindow::createVectorWotReplays(const QList<QFileInfo>& listFiles, std::
 
 }
 
-///
-/// \brief MainWindow::countThreads
-/// \return
-///
-uint MainWindow::countThreads()
+uint MainWindow::countThreads() noexcept
 {
     return  std::thread::hardware_concurrency();
 }
 
-
-
-/////
-/// \brief MainWindow::addToThread
-/// \param first
-/// \param begin
-/// \param end
-/// \param basePaths
-///
 template< class TypeVecIter, class TypePaths>
 void MainWindow::addToThread(TypeVecIter first, TypeVecIter begin, TypeVecIter end, const TypePaths& basePaths){
 
@@ -334,9 +297,6 @@ void MainWindow::addToThread(TypeVecIter first, TypeVecIter begin, TypeVecIter e
     }
 }
 
-///
-/// \brief MainWindow::on_pushButton_clicked
-///
 void MainWindow::on_pushButton_clicked()
 {
 
@@ -372,13 +332,6 @@ void MainWindow::on_pushButton_clicked()
     toThreadStatusBar("Каталог успешно выбран!", ui->statusBar);
 }
 
-
-
-
-///
-/// \brief MainWindow::on_paths_activated
-/// \param index
-///
 void MainWindow::on_paths_activated(int index)
 {
     using settings = WSTR::Settings;
@@ -388,8 +341,6 @@ void MainWindow::on_paths_activated(int index)
     //settings.save();
     clearTable(ui->tableWidget);
 }
-
-
 
 void MainWindow::on_checkBox_clicked()
 {
@@ -432,9 +383,6 @@ void MainWindow::on_checkBox_clicked()
 
 }
 
-///
-/// \brief MainWindow::on_runScan_clicked
-///
 void MainWindow::on_runScan_clicked()
 {
 
@@ -459,7 +407,8 @@ void MainWindow::on_runScan_clicked()
     assert(replay::getCount() == 0 && replay::getCountValidity() == 0);
 
     ui->tableWidget->setEnabled(false);
-
+    ui->tableWidget->setVisible(false);
+    ui->runScan->setEnabled(false);
     auto&& [vecReplays, isVecReplays] = createVectorWotReplaysThread(listFiles);
 
     if(!isVecReplays) {
@@ -485,17 +434,17 @@ void MainWindow::on_runScan_clicked()
 
     toThreadStatusBar("Обновлено!", ui->statusBar);
     ui->tableWidget->setEnabled(true);
+    ui->tableWidget->setVisible(true);
+    ui->runScan->setEnabled(true);
 
 
 }
-
 
 void MainWindow::on_checkBox_stateChanged(int arg1)
 {
 
 
 }
-
 
 void MainWindow::on_tableWidget_itemDoubleClicked(QTableWidgetItem *item)
 {
