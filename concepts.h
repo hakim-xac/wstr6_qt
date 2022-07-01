@@ -4,7 +4,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace WSTR {
+namespace KHAS {
 
 template <typename T, typename = void>
 struct IsMap : std::false_type {};

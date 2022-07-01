@@ -32,7 +32,6 @@ private slots:
 
     void on_paths_activated(int index);
 
-    void on_checkBox_clicked();
 
 
 
@@ -41,6 +40,8 @@ private slots:
     void on_tableWidget_itemDoubleClicked(QTableWidgetItem *item);
 
     void headerClicked(int index);
+
+    void on_auto_scan_stateChanged(int arg1);
 
 private:
     ///
@@ -84,7 +85,7 @@ private:
     /// \return
     ///
     template <typename TypeWidget, typename= std::enable_if_t<std::is_same_v<TypeWidget, QTableWidget>>>
-    bool replaysToTableThreads(TypeWidget& table, const std::vector<WSTR::Replay>& vec);
+    bool replaysToTableThreads(TypeWidget& table, const std::vector<KHAS::Replay>& vec);
 
     ///
     /// \brief setHeaderInTable
@@ -122,7 +123,7 @@ private:
     /// \brief createVectorWotReplaysThread
     /// \return
     ///
-    std::pair<std::vector<WSTR::Replay>, bool> createVectorWotReplaysThread(const QList<QFileInfo>& listFiles);
+    std::pair<std::vector<KHAS::Replay>, bool> createVectorWotReplaysThread(const QList<QFileInfo>& listFiles);
 
     ///
     /// \brief createVectorWotReplays
@@ -131,7 +132,7 @@ private:
     /// \param isSuccess
     /// \param isResult
     ///
-    static void createVectorWotReplays(const QList<QFileInfo>& listFiles, std::vector<WSTR::Replay>& vec, bool& isSuccess, bool & isResult);
+    static void createVectorWotReplays(const QList<QFileInfo>& listFiles, std::vector<KHAS::Replay>& vec, bool& isSuccess, bool & isResult);
 
     ///
     /// \brief addToThread
@@ -149,6 +150,12 @@ private:
     /// \return
     ///
     static uint countThreads() noexcept;
+
+    ///
+    /// \brief freezeWidgets
+    /// \param condition
+    ///
+    void freezeWidgets(bool condition);
 
 private:
     ///
@@ -205,7 +212,7 @@ QFileInfoList MainWindow
 /// \param begin
 /// \param end
 ///
-template <typename Iter, typename TypeWidget/*, typename std::enable_if_t<WSTR::IsMap<Type>::type>*/>
+template <typename Iter, typename TypeWidget/*, typename std::enable_if_t<KHAS::IsMap<Type>::type>*/>
 void MainWindow::setCurrentItemThreads(TypeWidget &table, Iter first, Iter begin, Iter end)
 {
     static_assert (std::is_same_v<TypeWidget, QTableWidget>, "static void MainWindow::setCurrentItemThreads(TypeWidget &table, Iter begin, Iter end)\
@@ -265,12 +272,12 @@ void MainWindow::setCurrentItemThreads(TypeWidget &table, Iter first, Iter begin
 template <typename Type>
 bool MainWindow::setHeaderInTable(QTableWidget &table)
 {
-    using settings = WSTR::Settings;
+    using settings = KHAS::Settings;
 
     for(size_t i{ 1 }, ie{ settings::getCountHeaderList() }; i <= ie; ++i){
 
         std::string headerName{ "header_" + std::to_string(i) };
-        auto&& [value, isValue] = settings::getValue<std::string>(headerName, WSTR::SelectBase::Headers);
+        auto&& [value, isValue] = settings::getValue<std::string>(headerName, KHAS::SelectBase::Headers);
 
         if(isValue){
             QTableWidgetItem* elem{ new QTableWidgetItem ( QString::fromStdString(value) ) };
@@ -291,13 +298,13 @@ bool MainWindow::setHeaderInTable(QTableWidget &table)
 
 
 template <typename TypeWidget, typename T2>
-bool MainWindow::replaysToTableThreads(TypeWidget& table, const std::vector<WSTR::Replay> &vec)
+bool MainWindow::replaysToTableThreads(TypeWidget& table, const std::vector<KHAS::Replay> &vec)
 {
 
-    using settings = WSTR::Settings;
+    using settings = KHAS::Settings;
 
 
-    static_assert (std::is_same_v<TypeWidget, QTableWidget>, "static bool MainWindow::replaysToTableThreads(TypeWidget& table, const std::vector<WSTR::Replay> &vec)\
+    static_assert (std::is_same_v<TypeWidget, QTableWidget>, "static bool MainWindow::replaysToTableThreads(TypeWidget& table, const std::vector<KHAS::Replay> &vec)\
     (TypeWidget == QTableWidget) == false");
 
     if(vec.size() == 0) return false;
@@ -341,8 +348,8 @@ bool MainWindow::replaysToTableThreads(TypeWidget& table, const std::vector<WSTR
     }
 
 
-    ui->allCount->setText(QString::number(WSTR::Replay::getCount()));
-    ui->allValidity->setText(QString::number(WSTR::Replay::getCountValidity()));
+    ui->allCount->setText(QString::number(KHAS::Replay::getCount()));
+    ui->allValidity->setText(QString::number(KHAS::Replay::getCountValidity()));
     return true;
 }
 

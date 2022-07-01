@@ -1,6 +1,6 @@
 #include "logs.h"
 
-namespace WSTR {
+namespace KHAS {
 
 Logs::~Logs()
 {

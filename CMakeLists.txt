@@ -25,6 +25,7 @@ set(PROJECT_SOURCES
         settings.cpp
         logs.cpp
         replay.cpp
+        zip_khas.cpp
         mainwindow.h
         mainwindow.ui
         settings.h
@@ -32,6 +33,8 @@ set(PROJECT_SOURCES
         enums.h
         replay.h
         concepts.h
+        zip_khas.h
+        src/zlib.h
         ${TS_FILES}
 )
 
@@ -63,6 +66,8 @@ else()
 endif()
 
 target_link_libraries(wstr6_qt PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+
+target_link_libraries(wstr6_qt PRIVATE "${CMAKE_SOURCE_DIR}/src/zlib.dll")
 
 set_target_properties(wstr6_qt PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com

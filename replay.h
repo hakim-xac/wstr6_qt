@@ -15,7 +15,7 @@
 #include <QJsonArray>
 #include "enums.h"
 
-namespace WSTR {
+namespace KHAS {
 class Replay
 {
 
@@ -32,22 +32,22 @@ private:            // PRIVATE VARIABLES
     ///
     ///
     ///
-    static inline std::map<WSTR::BattleType, std::string> battleList_{
-        { WSTR::BattleType::BattleForTheFortifiedArea   , "Битва за укреп район"    }
-        , { WSTR::BattleType::CombatTraining            , "Боевое обучение"         }
-        , { WSTR::BattleType::CompanyBattle             , "Ротный бой"              }
-        , { WSTR::BattleType::FanMode                   , "Фан режим"               }
-        , { WSTR::BattleType::HistoryBattles            , "Исторические бои"        }
-        , { WSTR::BattleType::Random                    , "Случайный бой"           }
-        , { WSTR::BattleType::Sortie                    , "Вылазка"                 }
-        , { WSTR::BattleType::TeamBattle                , "Командный бой"           }
-        , { WSTR::BattleType::Unknown                   , "Неизвестный режим"       }
-        , { WSTR::BattleType::Workout                   , "Тренировочный бой"       }
-        , { WSTR::BattleType::RankedBattle              , "Ранговый бой"            }
-        , { WSTR::BattleType::PitchedBattle             , "Генеральное сражение"    }
-        , { WSTR::BattleType::FrontLine                 , "Линия фронта"            }
-        , { WSTR::BattleType::Tournament                , "Турнир или против ИИ"    }
-        , { WSTR::BattleType::GK                        , "ГК"                      }
+    static inline std::map<KHAS::BattleType, std::string> battleList_{
+        { KHAS::BattleType::BattleForTheFortifiedArea   , "Битва за укреп район"    }
+        , { KHAS::BattleType::CombatTraining            , "Боевое обучение"         }
+        , { KHAS::BattleType::CompanyBattle             , "Ротный бой"              }
+        , { KHAS::BattleType::FanMode                   , "Фан режим"               }
+        , { KHAS::BattleType::HistoryBattles            , "Исторические бои"        }
+        , { KHAS::BattleType::Random                    , "Случайный бой"           }
+        , { KHAS::BattleType::Sortie                    , "Вылазка"                 }
+        , { KHAS::BattleType::TeamBattle                , "Командный бой"           }
+        , { KHAS::BattleType::Unknown                   , "Неизвестный режим"       }
+        , { KHAS::BattleType::Workout                   , "Тренировочный бой"       }
+        , { KHAS::BattleType::RankedBattle              , "Ранговый бой"            }
+        , { KHAS::BattleType::PitchedBattle             , "Генеральное сражение"    }
+        , { KHAS::BattleType::FrontLine                 , "Линия фронта"            }
+        , { KHAS::BattleType::Tournament                , "Турнир или против ИИ"    }
+        , { KHAS::BattleType::GK                        , "ГК"                      }
     };
 
     ///
@@ -127,7 +127,7 @@ public:             // PUBLIC FUNCTIONS
     bool setClientVersionFromXML(const std::string &newClientVersionFromXML)    noexcept;
 
 
-    static WSTR::BattleType getBattleType(const std::string& index)             noexcept;
+    static KHAS::BattleType getBattleType(const std::string& index)             noexcept;
     static size_t getCount()                                                    noexcept;
     static size_t getCountValidity()                                            noexcept;
     static void clearCounts()                                                   noexcept;
@@ -195,7 +195,7 @@ private:
     ///
     template <typename BlockType, typename ReplayType, typename = std::enable_if_t<
                   std::is_same_v<std::decay_t<BlockType>, QString>
-                  && std::is_same_v<std::decay_t<ReplayType>, WSTR::Replay>>>
+                  && std::is_same_v<std::decay_t<ReplayType>, KHAS::Replay>>>
     bool parseFirstBlock(BlockType&& block, ReplayType&& replay)  const noexcept;
 
     ///
@@ -206,7 +206,7 @@ private:
     ///    
     template <typename BlockType, typename ReplayType, typename = std::enable_if_t<
                   std::is_same_v<std::decay_t<BlockType>, QString>
-                  && std::is_same_v<std::decay_t<ReplayType>, WSTR::Replay>>>
+                  && std::is_same_v<std::decay_t<ReplayType>, KHAS::Replay>>>
     bool parseSecondBlock(BlockType&& block, ReplayType&& replay);
 
     ///
@@ -214,7 +214,7 @@ private:
     /// \param data
     /// \param replay
     ///
-    void ParseCommonBlock(QJsonObject&& data, WSTR::Replay& replay);
+    void ParseCommonBlock(QJsonObject&& data, KHAS::Replay& replay);
 
     ///
     /// \brief parseFileWotreplay
@@ -401,17 +401,17 @@ constexpr std::pair<std::decay_t<Type>, bool> Replay::isGetValue(KeyType&& key) 
     using type = std::decay_t<Type>;
     using keyType = std::decay_t<KeyType>;
 
-    constexpr bool typeIsBool       { std::is_same_v<type, bool>                };
-    constexpr bool typeIsString     { std::is_same_v<type, std::string>         };
-    constexpr bool typeIsSize_t     { std::is_same_v<type, size_t>              };
-    constexpr bool isStringView { std::is_convertible_v<keyType, std::string_view>    };
+    constexpr bool typeIsBool       { std::is_same_v<type, bool>                                                        };
+    constexpr bool typeIsString     { std::is_same_v<type, std::string>                                                 };
+    constexpr bool typeIsSize_t     { std::is_same_v<type, size_t>                                                      };
+    constexpr bool isStringView     { std::is_convertible_v<keyType, std::string_view>                                  };
 
-    constexpr bool typeIsBattleType { std::is_same_v<type, std::string> &&  std::is_same_v<keyType, WSTR::BattleType>   };
+    constexpr bool typeIsBattleType { std::is_same_v<type, std::string> &&  std::is_same_v<keyType, KHAS::BattleType>   };
 
 
     if constexpr (typeIsBool && isStringView){
         try{
-            return { dataBool_.at(key.data()), true };
+            return { dataBool_.at(std::forward<KeyType>(key).data()), true };
         }
         catch(std::out_of_range ex){
             assert("ERROR !!! std::out_of_range!");
@@ -420,7 +420,7 @@ constexpr std::pair<std::decay_t<Type>, bool> Replay::isGetValue(KeyType&& key) 
     }
     else if constexpr (typeIsString && isStringView) {
         try{
-            return { dataString_.at(key.data()), true };
+            return { dataString_.at(std::forward<KeyType>(key).data()), true };
         }
         catch(...){
             assert("ERROR !!! std::out_of_range!");
@@ -429,7 +429,7 @@ constexpr std::pair<std::decay_t<Type>, bool> Replay::isGetValue(KeyType&& key) 
     }
     else if constexpr (typeIsSize_t && isStringView) {
         try{
-            return { dataSize_t_.at(key.data()), true };
+            return { dataSize_t_.at(std::forward<KeyType>(key).data()), true };
         }
         catch(...){
             assert("ERROR !!! std::out_of_range!");
@@ -438,7 +438,7 @@ constexpr std::pair<std::decay_t<Type>, bool> Replay::isGetValue(KeyType&& key) 
     }
     else if constexpr (typeIsBattleType) {
         try{
-            return { battleList_.at(key), true };
+            return { battleList_.at(std::forward<KeyType>(key)), true };
         }
         catch(...){
             assert("ERROR !!! std::out_of_range!");

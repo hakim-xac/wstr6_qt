@@ -1,7 +1,7 @@
 #ifndef ENUMS_H
 #define ENUMS_H
 
-namespace WSTR {
+namespace KHAS {
 
 ///
 /// \brief The AppType enum

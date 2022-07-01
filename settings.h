@@ -10,8 +10,9 @@
 #include <QCoreApplication>
 #include <QComboBox>
 #include <array>
+#include <set>
 
-namespace WSTR {
+namespace KHAS {
 
 
 class Settings{
@@ -23,7 +24,7 @@ public:
     /// \return
     ///
     template <typename TypeInMap = std::string>
-    static const TypeInMap getFieldName(WSTR::FieldNames fn);
+    static const TypeInMap getFieldName(KHAS::FieldNames fn);
 
 
 private:
@@ -33,23 +34,23 @@ private:
         ///
         ///
         ///
-        static inline std::map<WSTR::FieldNames, const std::string> fieldNames{
-            { WSTR::FieldNames::ActiveColumn,               "activeColumn"          }
-            , { WSTR::FieldNames::TypeSortColumns,          "typeSortColumns"       }
-            , { WSTR::FieldNames::CurrentPathIndex,         "currentPathIndex"      }
-            , { WSTR::FieldNames::CountOfPaths,             "countOfPaths"          }
-            , { WSTR::FieldNames::WaitUpdateStatusBar_s,    "waitUpdateStatusBar_s" }
+        static inline std::map<KHAS::FieldNames, const std::string> fieldNames{
+            { KHAS::FieldNames::ActiveColumn,               "activeColumn"          }
+            , { KHAS::FieldNames::TypeSortColumns,          "typeSortColumns"       }
+            , { KHAS::FieldNames::CurrentPathIndex,         "currentPathIndex"      }
+            , { KHAS::FieldNames::CountOfPaths,             "countOfPaths"          }
+            , { KHAS::FieldNames::WaitUpdateStatusBar_s,    "waitUpdateStatusBar_s" }
         };
 
         ///
         ///
         ///
         static inline const std::map<const std::string, std::string> bd{
-            { WSTR::Settings::getFieldName(WSTR::FieldNames::CountOfPaths),             "0" }
-            , { WSTR::Settings::getFieldName(WSTR::FieldNames::CurrentPathIndex),       "0" }
-            , { WSTR::Settings::getFieldName(WSTR::FieldNames::WaitUpdateStatusBar_s),  "2" }
-            , { WSTR::Settings::getFieldName(WSTR::FieldNames::ActiveColumn),           "0" }
-            , { WSTR::Settings::getFieldName(WSTR::FieldNames::TypeSortColumns),        "0" }
+            { KHAS::Settings::getFieldName(KHAS::FieldNames::CountOfPaths),             "0" }
+            , { KHAS::Settings::getFieldName(KHAS::FieldNames::CurrentPathIndex),       "0" }
+            , { KHAS::Settings::getFieldName(KHAS::FieldNames::WaitUpdateStatusBar_s),  "2" }
+            , { KHAS::Settings::getFieldName(KHAS::FieldNames::ActiveColumn),           "0" }
+            , { KHAS::Settings::getFieldName(KHAS::FieldNames::TypeSortColumns),        "0" }
         };
 
         ///
@@ -73,24 +74,24 @@ private:
         ///
         ///
         ///
-        static inline const std::map<const std::string, int> headerMap{
-            { "id"                      , 0 }
-            , {"size"                   , 0 }
-            , {"validity"               , 0 }
-            , {"hasMods"                , 0 }
-            , {"respawn"                , 0 }
-            , {"duration"               , 0 }
-            , {"winnerTeam"             , 0 }
-            , {"dateTime"               , 0 }
-            , {"playerVehicle"          , 0 }
-            , {"mapName"                , 0 }
-            , {"playerName"             , 0 }
-            , {"mapDisplayName"         , 0 }
-            , {"replayName"             , 0 }
-            , {"playerID"               , 0 }
-            , {"clientVersionFromXml"   , 0 }
-            , {"arenaCreateTime"        , 0 }
-            , {"battleType"             , 0 }
+        static inline const std::set<std::string_view> headerSet{
+            "id"
+            , "size"
+            , "validity"
+            , "hasMods"
+            , "respawn"
+            , "duration"
+            , "winnerTeam"
+            , "dateTime"
+            , "playerVehicle"
+            , "mapName"
+            , "playerName"
+            , "mapDisplayName"
+            , "replayName"
+            , "playerID"
+            , "clientVersionFromXml"
+            , "arenaCreateTime"
+            , "battleType"
         };
 
     };
@@ -116,12 +117,12 @@ private:            // PRIVATE VARIABLES
     ///
     ///
     ///
-    static inline std::map<const std::string, std::string> bd_{ WSTR::Settings::Default::bd };
+    static inline std::map<const std::string, std::string> bd_{ KHAS::Settings::Default::bd };
 
     ///
     ///
     ///
-    static inline std::map<const std::string, std::string> headerList_{ WSTR::Settings::Default::header };
+    static inline std::map<const std::string, std::string> headerList_{ KHAS::Settings::Default::header };
 
     ///
     ///
@@ -173,7 +174,7 @@ private:            // PRIVATE STATIC FUNCTIONS
     /// \return
     ///
     template <typename OutType>
-    static std::map<const OutType, OutType>* selectBase(WSTR::SelectBase sb = WSTR::SelectBase::General);
+    static std::map<const OutType, OutType>* selectBase(KHAS::SelectBase sb = KHAS::SelectBase::General);
 
 private:            // PRIVATE FUNCTIONS
 
@@ -199,7 +200,7 @@ private:            // PRIVATE FUNCTIONS
     /// \return
     ///
     template <typename KeyType, typename ValueType>
-    static bool checkValue(KeyType&& key, ValueType&& value, WSTR::SelectBase sb = WSTR::SelectBase::General) noexcept;
+    static bool checkValue(KeyType&& key, ValueType&& value, KHAS::SelectBase sb = KHAS::SelectBase::General) noexcept;
 
 
 public:             // PUBLIC FUNCTIONS
@@ -231,9 +232,9 @@ public:             // PUBLIC FUNCTIONS
     /// \param sb
     /// \return
     ///
-    template <typename Type = std::string>
+    template <typename Type = std::string, typename KeyType>
     static std::pair<std::decay_t<Type>, bool>
-    getValue(const std::string& key, WSTR::SelectBase sb = WSTR::SelectBase::General);
+    getValue(KeyType&& key, KHAS::SelectBase sb = KHAS::SelectBase::General);
 
     ///
     /// \brief setValue
@@ -243,7 +244,7 @@ public:             // PUBLIC FUNCTIONS
     ///
     template <typename KeyType = std::string, typename ValueType = std::string>
     static bool
-    setValue(KeyType&& key, ValueType&& value, WSTR::SelectBase sb = WSTR::SelectBase::General);
+    setValue(KeyType&& key, ValueType&& value, KHAS::SelectBase sb = KHAS::SelectBase::General);
 
     ///
     /// \brief getDefaultPath
@@ -325,13 +326,13 @@ std::map<const OutType, OutType>*Settings
             , "Map keys must be type T constants, values must be type T");
 
     switch(sb){
-    case WSTR::SelectBase::General:
+    case KHAS::SelectBase::General:
     return &bd_;
     break;
-    case WSTR::SelectBase::Paths:
+    case KHAS::SelectBase::Paths:
     return &pathsList_;
     break;
-    case WSTR::SelectBase::Headers:
+    case KHAS::SelectBase::Headers:
     return &headerList_;
     break;
 
@@ -345,9 +346,10 @@ std::map<const OutType, OutType>*Settings
 ////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-template <typename Type>
+template <typename Type, typename KeyType>
 std::pair<std::decay_t<Type>, bool> Settings
-::getValue(const std::string& key, WSTR::SelectBase sb){
+::getValue(KeyType&& key, KHAS::SelectBase sb){
+
     using type = std::decay_t<Type>;
 
     auto base{ selectBase<std::string>(sb) };
@@ -355,11 +357,11 @@ std::pair<std::decay_t<Type>, bool> Settings
     if(!base) return { type(), false };
     try{
         if constexpr(std::is_same_v<type, std::string>){
-            return { base->at(key.data()), true };
+            return { base->at(std::forward<KeyType>(key)), true };
         }
         else {
             std::stringstream ss;
-            ss << base->at(key.data());
+            ss << base->at(std::forward<KeyType>(key));
             type tmp{};
             if(ss >> tmp) return { tmp, true };
             return { type() , false };
@@ -377,7 +379,7 @@ std::pair<std::decay_t<Type>, bool> Settings
 
 template <typename KeyType, typename ValueType>
 bool Settings
-::setValue(KeyType&& key, ValueType&& value, WSTR::SelectBase sb ){
+::setValue(KeyType&& key, ValueType&& value, KHAS::SelectBase sb ){
     auto base{ selectBase<std::string>(sb) };
     if(!base) return false;
 
@@ -406,7 +408,7 @@ bool Settings::checkValue(KeyType&& key, ValueType&& value, SelectBase sb) noexc
         ss << "auto&& [newValue, isGet] = getValue(key, sb);\n";
         ss << "isGet == FALSE\n";
 
-        WSTR::Logs::pushAndFlash(ss.str(), WSTR::AppType::Debug);
+        KHAS::Logs::pushAndFlash(ss.str(), KHAS::AppType::Debug);
         return false;
     }
     if(newValue != std::forward<ValueType>(value)) {
@@ -415,7 +417,7 @@ bool Settings::checkValue(KeyType&& key, ValueType&& value, SelectBase sb) noexc
         ss << "auto&& [newValue, isGet] = getValue(key, sb);\n";
         ss << "(newValue == value) == FALSE \n";
 
-        WSTR::Logs::pushAndFlash(ss.str(), WSTR::AppType::Debug);
+        KHAS::Logs::pushAndFlash(ss.str(), KHAS::AppType::Debug);
         return false;
     }
     return true;

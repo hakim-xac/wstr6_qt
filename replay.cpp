@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-namespace WSTR{
+namespace KHAS{
 
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -100,7 +100,7 @@ bool Replay::setWinnerTeam(size_t newWinnerTeam) noexcept
 
 bool Replay::setBattleType(size_t newBattleType) noexcept
 {
-    WSTR::BattleType bt{ getBattleType(std::to_string(newBattleType)) };
+    KHAS::BattleType bt{ getBattleType(std::to_string(newBattleType)) };
 
     auto&& [value, isValue] = isGetValue<std::string>(bt);
     if(isValue) {
@@ -179,29 +179,29 @@ bool Replay::setClientVersionFromXML(const std::string &newClientVersionFromXML)
 BattleType Replay::getBattleType(const std::string& index) noexcept
 {
     auto&& [value, isValue] = Settings::stringToType<size_t>(index);
-    if(!isValue) return WSTR::BattleType::Unknown;
+    if(!isValue) return KHAS::BattleType::Unknown;
 
     switch(value){
     case 1:
-    return WSTR::BattleType::Random;
+    return KHAS::BattleType::Random;
     case 2:
-    return WSTR::BattleType::Workout;
+    return KHAS::BattleType::Workout;
     case 7:
-    return WSTR::BattleType::TeamBattle;
+    return KHAS::BattleType::TeamBattle;
     case 9:
-    return WSTR::BattleType::FanMode;
+    return KHAS::BattleType::FanMode;
     case 13:
-    return WSTR::BattleType::GK;
+    return KHAS::BattleType::GK;
     case 22:
-    return WSTR::BattleType::RankedBattle;
+    return KHAS::BattleType::RankedBattle;
     case 24:
-    return WSTR::BattleType::PitchedBattle;
+    return KHAS::BattleType::PitchedBattle;
     case 27:
-    return WSTR::BattleType::FrontLine;
+    return KHAS::BattleType::FrontLine;
     case 29:
-    return WSTR::BattleType::Tournament;
+    return KHAS::BattleType::Tournament;
     default:
-    return WSTR::BattleType::Unknown;
+    return KHAS::BattleType::Unknown;
 
     }
 }

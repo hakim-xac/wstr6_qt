@@ -29,14 +29,14 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_5">
            <item>
-            <widget class="QPushButton" name="pushButton">
+            <widget class="QPushButton" name="openDir">
              <property name="text">
               <string>открыть каталог</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QCheckBox" name="checkBox">
+            <widget class="QCheckBox" name="auto_scan">
              <property name="cursor">
               <cursorShape>PointingHandCursor</cursorShape>
              </property>

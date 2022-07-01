@@ -8,7 +8,7 @@
 #include <string>
 #include <sstream>
 
-namespace WSTR {
+namespace KHAS {
 
 
 class Logs
@@ -35,7 +35,7 @@ public:
     /// \param elem
     ///
     template <typename Type>
-    static void push(Type&& elem, WSTR::AppType appType = WSTR::AppType::Release);
+    static void push(Type&& elem, KHAS::AppType appType = KHAS::AppType::Release);
 
     ///
     /// \brief flush
@@ -47,7 +47,7 @@ public:
     /// \param elem
     ///
     template <typename Type>
-    static void pushAndFlash(Type&& elem, WSTR::AppType appType = WSTR::AppType::Release);
+    static void pushAndFlash(Type&& elem, KHAS::AppType appType = KHAS::AppType::Release);
 
 };
 
@@ -57,10 +57,10 @@ public:
 
 template <typename Type>
 void Logs
-::push(Type&& elem, WSTR::AppType appType){
+::push(Type&& elem, KHAS::AppType appType){
     QTime currentTime{ QTime::currentTime() };
 
-        if(appType == WSTR::AppType::Release || currentApplicationType_ == WSTR::AppType::Debug){
+        if(appType == KHAS::AppType::Release || currentApplicationType_ == KHAS::AppType::Debug){
             base_ << std::setw(10) << std::left << "Time: " << "| "
               << std::setw(15) << std::right << currentTime.toString("hh:mm:ss:zzz").toStdString() << "\n"
               << std::setw(10) << std::left << "Message: " << "| "
@@ -71,7 +71,7 @@ void Logs
 
 template <typename Type>
 void Logs
-::pushAndFlash(Type&& elem, WSTR::AppType appType){
+::pushAndFlash(Type&& elem, KHAS::AppType appType){
 
         push(std::forward<Type>(elem), appType);
         flush();

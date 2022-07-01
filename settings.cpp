@@ -7,7 +7,7 @@
 #include <iterator>
 #include <iostream>    // for log test. std::cout
 
-namespace WSTR {
+namespace KHAS {
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -35,7 +35,7 @@ Settings::~Settings()
 
 bool Settings::saveToFile(std::stringstream& buffer)
 {
-    std::ofstream fs(WSTR::Settings::settingFileName().data());
+    std::ofstream fs(KHAS::Settings::settingFileName().data());
     if(!fs.is_open()) return false;
     fs.clear();
     if(!(fs << buffer.str())){
@@ -68,53 +68,53 @@ bool Settings::parse(const std::vector<std::string> &configBuffer)
     for(auto&& line: configBuffer){
         auto&& [pair, isParse] = parseLine(line);
         if(!isParse){
-            WSTR::Logs::pushAndFlash("Parse(line) == false", WSTR::AppType::Debug);
+            KHAS::Logs::pushAndFlash("Parse(line) == false", KHAS::AppType::Debug);
             return false;
         }
 
         auto&& [key, value] = pair;
-        WSTR::SelectBase sb{ WSTR::SelectBase::General };
+        KHAS::SelectBase sb{ KHAS::SelectBase::General };
 
         if(key.starts_with("path_"sv)) {
             if(!checkDirExists(value)){
                 std::stringstream ss;
                 ss << "if(!checkDirExists(value)) == false\n";
                 ss << "value: " << value << std::endl;
-                WSTR::Logs::pushAndFlash(ss.str(), WSTR::AppType::Debug);
+                KHAS::Logs::pushAndFlash(ss.str(), KHAS::AppType::Debug);
                 continue;
             }
-            if(!setValue(key, value, WSTR::SelectBase::Paths)){
-                std::stringstream ss{ "if(!setValue(key, value, WSTR::SelectBase::Paths)) == false\n" };
-                WSTR::Logs::pushAndFlash(ss.str(), WSTR::AppType::Debug);
+            if(!setValue(key, value, KHAS::SelectBase::Paths)){
+                std::stringstream ss{ "if(!setValue(key, value, KHAS::SelectBase::Paths)) == false\n" };
+                KHAS::Logs::pushAndFlash(ss.str(), KHAS::AppType::Debug);
                 return false;
             }
-            sb = WSTR::SelectBase::Paths;
+            sb = KHAS::SelectBase::Paths;
         }
         else if(key.starts_with("header_"sv)) {
 
             if(!checkHeaderItem(key, value)){
                 headerList_.clear();
-                headerList_ = WSTR::Settings::Default::header;
+                headerList_ = KHAS::Settings::Default::header;
 
                 std::stringstream ss;
                 ss << "if(!checkHeaderItem(key, value)) == false\n";
                 ss << "key: " << key << " value: " << value << std::endl;
-                WSTR::Logs::pushAndFlash(ss.str(), WSTR::AppType::Debug);
+                KHAS::Logs::pushAndFlash(ss.str(), KHAS::AppType::Debug);
                 return false;
             }
 
-            if(!setValue(key, value, WSTR::SelectBase::Headers)){
-                std::stringstream ss{ "if(!setValue(key, value, WSTR::SelectBase::Headers)) == false\n" };
-                WSTR::Logs::pushAndFlash(ss.str(), WSTR::AppType::Debug);
+            if(!setValue(key, value, KHAS::SelectBase::Headers)){
+                std::stringstream ss{ "if(!setValue(key, value, KHAS::SelectBase::Headers)) == false\n" };
+                KHAS::Logs::pushAndFlash(ss.str(), KHAS::AppType::Debug);
                 return false;
             }
-            sb = WSTR::SelectBase::Headers;
+            sb = KHAS::SelectBase::Headers;
         }
         else {
 
             if(!setValue(key, value)){
                 std::stringstream ss{ "if(!setValue(key, value)) == false\n" };
-                WSTR::Logs::pushAndFlash(ss.str(), WSTR::AppType::Debug);
+                KHAS::Logs::pushAndFlash(ss.str(), KHAS::AppType::Debug);
                 return false;
             }
 
@@ -122,25 +122,25 @@ bool Settings::parse(const std::vector<std::string> &configBuffer)
             if(!isType) {
                 std::stringstream ss{ "auto&& [val, isType] = stringToType<int>(value);\
                                       if(!isType) == false\n" };
-                WSTR::Logs::pushAndFlash(ss.str(), WSTR::AppType::Debug);
+                KHAS::Logs::pushAndFlash(ss.str(), KHAS::AppType::Debug);
                 return false;
             }
 
             if(!checkIsRange(0ull, 100ull, val)){
                 std::stringstream ss{ "if(!checkIsRange(0, 100, value)) == false\n" };
-                WSTR::Logs::pushAndFlash(ss.str(), WSTR::AppType::Debug);
+                KHAS::Logs::pushAndFlash(ss.str(), KHAS::AppType::Debug);
                 return false;
             }
-            sb = WSTR::SelectBase::General;
+            sb = KHAS::SelectBase::General;
         }
 
         if(!checkValue(key, value, sb)){
             std::stringstream ss{ "if(!checkValue(key, value, sb)) == false\n" };
-            WSTR::Logs::pushAndFlash(ss.str(), WSTR::AppType::Debug);
+            KHAS::Logs::pushAndFlash(ss.str(), KHAS::AppType::Debug);
             return false;
         }
 
-        WSTR::Logs::pushAndFlash("successful loading settings\nkey: " + key + "\nvalue: " + value, WSTR::AppType::Debug);
+        KHAS::Logs::pushAndFlash("successful loading settings\nkey: " + key + "\nvalue: " + value, KHAS::AppType::Debug);
     }
     return true;
 }
@@ -184,7 +184,7 @@ void Settings::PathFromQComboBoxToPathsBufer(const QComboBox& list)
     using namespace std::string_literals;
     pathsList_.clear();
     for(int it{}, end{ list.count() }; it < end; ++it){
-        setValue("path_"s+std::to_string(it), list.itemText(it).toStdString(), WSTR::SelectBase::Paths);
+        setValue("path_"s+std::to_string(it), list.itemText(it).toStdString(), KHAS::SelectBase::Paths);
     }
 }
 
@@ -211,17 +211,7 @@ size_t Settings::getCountHeaderList()
 
 bool Settings::checkIsHeaderValue(std::string_view value)
 {
-    try {
-        Default::headerMap.at(value.data());
-        return true;
-    }
-    catch (std::out_of_range ex) {
-        std::stringstream ss;
-        ss << "bool Settings::checkIsHeaderValue(std::string_view value) == false\n";
-        ss << "error: " << ex.what()<< std::endl;
-        WSTR::Logs::pushAndFlash(ss.str(), WSTR::AppType::Debug);
-        return false;
-    }
+    return Default::headerSet.find(value) != Default::headerSet.end();
 }
 
 ///
@@ -263,7 +253,7 @@ bool Settings::save()
 bool Settings::load()
 {
 
-    WSTR::Logs::pushAndFlash("Start Settings.load()", WSTR::AppType::Debug);
+    KHAS::Logs::pushAndFlash("Start Settings.load()", KHAS::AppType::Debug);
 
     std::ifstream fs(settingFileName());
 
@@ -271,7 +261,7 @@ bool Settings::load()
         std::stringstream ss;
         ss << "Can`t open settings file: ";
         ss << settingFileName();
-        WSTR::Logs::pushAndFlash(ss.str(), WSTR::AppType::Debug);
+        KHAS::Logs::pushAndFlash(ss.str(), KHAS::AppType::Debug);
         return false;
     }
     std::vector <std::string> tmpVecConfig;
@@ -279,20 +269,20 @@ bool Settings::load()
     std::copy(std::istream_iterator<std::string>(fs), {}, std::back_inserter(tmpVecConfig));
     if(!tmpVecConfig.size()) {
 
-        WSTR::Logs::pushAndFlash("Empty configuration file", WSTR::AppType::Debug);
+        KHAS::Logs::pushAndFlash("Empty configuration file", KHAS::AppType::Debug);
 
         fs.close();
         return false;
     }
 
     if(!parse(tmpVecConfig)) {
-        WSTR::Logs::pushAndFlash("if(!parse(tmpVecConfig)) == true", WSTR::AppType::Debug);
+        KHAS::Logs::pushAndFlash("if(!parse(tmpVecConfig)) == true", KHAS::AppType::Debug);
         fs.close();
         return false;
     }
 
     fs.close();
-    WSTR::Logs::pushAndFlash("successful loading settings", WSTR::AppType::Debug);
+    KHAS::Logs::pushAndFlash("successful loading settings", KHAS::AppType::Debug);
     return true;
 }
 
