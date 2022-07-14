@@ -28,8 +28,6 @@ public:
 private slots:
     void on_runScan_clicked();
 
-    void on_pushButton_clicked();
-
     void on_paths_activated(int index);
 
 
@@ -42,6 +40,8 @@ private slots:
     void headerClicked(int index);
 
     void on_auto_scan_stateChanged(int arg1);
+
+    void on_openDir_clicked();
 
 private:
     ///

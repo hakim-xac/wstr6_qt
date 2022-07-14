@@ -11,7 +11,6 @@
 #include <thread>
 #include <functional>
 #include <chrono>
-#include "zip_khas.h"
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -308,41 +307,6 @@ void MainWindow::addToThread(TypeVecIter first, TypeVecIter begin, TypeVecIter e
     }
 }
 
-void MainWindow::on_pushButton_clicked()
-{
-
-    using settings = KHAS::Settings;
-    using fieldNames = KHAS::FieldNames;
-
-    QString currentDir{ ui->paths->itemText(ui->paths->currentIndex()) };
-
-    QString dir{ QFileDialog::getExistingDirectory(this, tr("Open Directory"),
-                                                    currentDir,
-                                                    QFileDialog::ShowDirsOnly
-                                                    | QFileDialog::DontResolveSymlinks) };
-    if(dir.isEmpty()) return;
-
-    auto findIndex{ ui->paths->findText(dir) };
-
-    if(findIndex != -1){
-        ui->paths->setCurrentIndex(findIndex);
-    }
-    else{
-        ui->paths->addItem(dir);
-        ui->paths->setCurrentIndex(ui->paths->count()-1);
-    }
-
-    settings::setValue(settings::getFieldName(fieldNames::CountOfPaths), std::to_string(ui->paths->count()));
-    settings::setValue(settings::getFieldName(fieldNames::CurrentPathIndex), std::to_string(ui->paths->currentIndex()));
-
-    settings::PathFromQComboBoxToPathsBufer(*ui->paths);
-    settings::save();
-
-    clearTable(ui->tableWidget);
-
-    toThreadStatusBar("Каталог успешно выбран!", ui->statusBar);
-}
-
 void MainWindow::on_paths_activated(int index)
 {
     using settings = KHAS::Settings;
@@ -357,11 +321,11 @@ void MainWindow::on_runScan_clicked()
 {
 
 
-    std::string s{ "hello" };
+   // std::string s{ "hello" };
 
-    KHAS::Zip p{ "1.zip" };
+    //KHAS::Zip p{ "1.zip" };
 
-    p.test_compression();
+   // p.test_compression();
 
     using replay = KHAS::Replay;
     using settings = KHAS::Settings;
@@ -506,5 +470,41 @@ void MainWindow::on_auto_scan_stateChanged(int arg1)
         }
     }
 #endif
+}
+
+
+void MainWindow::on_openDir_clicked()
+{
+
+    using settings = KHAS::Settings;
+    using fieldNames = KHAS::FieldNames;
+
+    QString currentDir{ ui->paths->itemText(ui->paths->currentIndex()) };
+
+    QString dir{ QFileDialog::getExistingDirectory(this, tr("Open Directory"),
+                                                    currentDir,
+                                                    QFileDialog::ShowDirsOnly
+                                                    | QFileDialog::DontResolveSymlinks) };
+    if(dir.isEmpty()) return;
+
+    auto findIndex{ ui->paths->findText(dir) };
+
+    if(findIndex != -1){
+        ui->paths->setCurrentIndex(findIndex);
+    }
+    else{
+        ui->paths->addItem(dir);
+        ui->paths->setCurrentIndex(ui->paths->count()-1);
+    }
+
+    settings::setValue(settings::getFieldName(fieldNames::CountOfPaths), std::to_string(ui->paths->count()));
+    settings::setValue(settings::getFieldName(fieldNames::CurrentPathIndex), std::to_string(ui->paths->currentIndex()));
+
+    settings::PathFromQComboBoxToPathsBufer(*ui->paths);
+    settings::save();
+
+    clearTable(ui->tableWidget);
+
+    toThreadStatusBar("Каталог успешно выбран!", ui->statusBar);
 }
 
